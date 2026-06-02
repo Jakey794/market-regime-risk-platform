@@ -1,21 +1,20 @@
 # Market Regime + Portfolio Risk Modeling Platform
 
-A Python-based portfolio risk, regime detection, stress-testing, and backtesting research platform.
+A Python quant/MLE research platform for portfolio risk, market regime detection, stress-testing, and backtesting.
 
-This is **not** a stock prediction app. The goal is to analyze portfolio risk environments, compare regime models, stress-test allocations, and produce interpretable quarterly risk review notes.
+This is not a stock prediction app.
 
-## Week 1 Status
+The goal is to study portfolio behavior across changing market environments, compare regime and risk models, evaluate stress scenarios, and produce interpretable research outputs.
 
-Current foundation:
+## Day 1 Setup
 
-- Python package initialized with `uv`
-- Clean repo structure
-- Core folders for data, features, risk, models, backtesting, reporting, and dashboard
-- Starter test suite
-- Development dependencies installed
+- Project structure for data, features, risk, models, backtesting, reporting, notebooks, and app experiments
+- Starter `mrrp` Python package
+- Smoke test and basic `uv`/`ruff`/`pytest` Makefile commands
 
 ## Quickstart
 
 ```bash
 uv sync
-uv run pytest
+make check
+```
