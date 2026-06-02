@@ -1,0 +1,36 @@
+[project]
+name = "market-regime-risk-platform"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Jakey794", email = "jacob.allan2007@icloud.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "hmmlearn>=0.3.3",
+    "numpy>=2.4.6",
+    "pandas>=3.0.3",
+    "plotly>=6.7.0",
+    "pyarrow>=24.0.0",
+    "pydantic>=2.13.4",
+    "pyyaml>=6.0.3",
+    "ruptures>=1.1.10",
+    "scikit-learn>=1.9.0",
+    "streamlit>=1.58.0",
+    "yfinance>=1.4.1",
+]
+
+[project.scripts]
+market-regime-risk-platform = "market_regime_risk_platform:main"
+
+[build-system]
+requires = ["uv_build>=0.11.18,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mypy>=2.1.0",
+    "pytest>=9.0.3",
+    "ruff>=0.15.15",
+]
