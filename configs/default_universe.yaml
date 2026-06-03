@@ -1,0 +1,27 @@
+assets:
+  us_equity:
+    - SPY
+  nasdaq:
+    - QQQ
+  canada_equity:
+    - XIU.TO
+  developed_markets:
+    - EFA
+  emerging_markets:
+    - EEM
+  sectors:
+    - XLK
+    - XLF
+    - XLE
+    - XLV
+    - XLI
+    - XLY
+    - XLP
+    - XLU
+    - XLB
+    - XLRE
+
+benchmark: SPY
+
+start_date: "2005-01-01"
+end_date: null

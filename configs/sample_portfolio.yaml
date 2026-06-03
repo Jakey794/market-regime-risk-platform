@@ -1,0 +1,9 @@
+name: sample_global_equity_portfolio
+benchmark: SPY
+weights:
+  SPY: 0.35
+  QQQ: 0.15
+  XIU.TO: 0.20
+  EFA: 0.15
+  EEM: 0.10
+  XLK: 0.05

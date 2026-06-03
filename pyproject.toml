@@ -1,7 +1,7 @@
 [project]
 name = "market-regime-risk-platform"
 version = "0.1.0"
-description = "Add your description here"
+description = "Market regime and portfolio risk modeling platform"
 readme = "README.md"
 authors = [
     { name = "Jakey794", email = "jacob.allan2007@icloud.com" }
@@ -21,9 +21,6 @@ dependencies = [
     "yfinance>=1.4.1",
 ]
 
-[project.scripts]
-market-regime-risk-platform = "market_regime_risk_platform:main"
-
 [build-system]
 requires = ["uv_build>=0.11.18,<0.12.0"]
 build-backend = "uv_build"
@@ -34,3 +31,9 @@ dev = [
     "pytest>=9.0.3",
     "ruff>=0.15.15",
 ]
+
+[tool.uv.build-backend]
+module-name = "mrrp"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
