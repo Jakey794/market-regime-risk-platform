@@ -26,6 +26,25 @@ def flatten_asset_universe(config: UniverseConfig) -> list[str]:
     return sorted(tickers)
 
 
+def flatten_asset_universe_preserve_order(config: UniverseConfig) -> list[str]:
+    """Flatten grouped assets and benchmark while preserving first-seen order."""
+    tickers: list[str] = []
+    seen: set[str] = set()
+
+    for group_tickers in config.assets.values():
+        for ticker in group_tickers:
+            normalized_ticker = ticker.strip().upper()
+            if normalized_ticker not in seen:
+                tickers.append(normalized_ticker)
+                seen.add(normalized_ticker)
+
+    benchmark = config.benchmark.strip().upper()
+    if benchmark not in seen:
+        tickers.append(benchmark)
+
+    return tickers
+
+
 def get_asset_groups(config: UniverseConfig) -> dict[str, list[str]]:
     """Return a defensive copy of asset groups."""
     return {group: list(tickers) for group, tickers in config.assets.items()}
