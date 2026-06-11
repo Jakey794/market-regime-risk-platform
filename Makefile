@@ -1,7 +1,10 @@
-.PHONY: setup test lint format check clean
+.PHONY: setup data test lint format check clean
 
 setup:
 	uv sync
+
+data:
+	uv run python scripts/download_data.py --config configs/default_universe.yaml --out data/processed/adjusted_close.parquet
 
 test:
 	uv run pytest
