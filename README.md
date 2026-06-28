@@ -16,6 +16,19 @@ across changing market environments and producing interpretable risk outputs.
 - GitHub Actions CI
 - Starter data audit notebook
 
+## Week 2 Metrics Engine
+
+The portfolio risk engine now includes:
+
+- Simple, logarithmic, cumulative, and weighted portfolio returns
+- Annualized return, volatility, rolling volatility, and EWMA volatility
+- Drawdown paths, maximum/current drawdown, and drawdown duration
+- Sharpe, Sortino, Calmar, tracking-error, and information ratios
+- Asset, rolling, and weighted portfolio beta
+- Rolling correlation matrices and mean pairwise correlation
+- Historical VaR/CVaR, worst-period returns, skewness, and kurtosis
+- An integrated numeric portfolio risk summary against a benchmark
+
 ## Quickstart
 
 ```bash
