@@ -1,0 +1,30 @@
+SPY:
+  asset_class: Equity
+  region: United States
+  style: Large Blend
+  sector_proxy: Broad Market
+QQQ:
+  asset_class: Equity
+  region: United States
+  style: Large Growth
+  sector_proxy: Technology
+XIU.TO:
+  asset_class: Equity
+  region: Canada
+  style: Large Blend
+  sector_proxy: Broad Market
+EFA:
+  asset_class: Equity
+  region: Developed ex North America
+  style: Large Blend
+  sector_proxy: Broad Market
+EEM:
+  asset_class: Equity
+  region: Emerging Markets
+  style: Large Blend
+  sector_proxy: Broad Market
+XLK:
+  asset_class: Equity
+  region: United States
+  style: Large Growth
+  sector_proxy: Technology
