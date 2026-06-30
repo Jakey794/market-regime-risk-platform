@@ -1,6 +1,8 @@
 name: sample_global_equity_portfolio
 benchmark: SPY
-weights:
+currency: CAD
+allow_short: false
+holdings:
   SPY: 0.35
   QQQ: 0.15
   XIU.TO: 0.20
