@@ -7,10 +7,13 @@ from dataclasses import dataclass
 from datetime import date
 from typing import Any
 
+from mrrp.dashboard.loaders import DashboardData
+
 
 PORTFOLIO_KEY = "dashboard_selected_portfolio"
 BENCHMARK_KEY = "dashboard_selected_benchmark"
 DATE_RANGE_KEY = "dashboard_date_range"
+DASHBOARD_DATA_KEY = "dashboard_data"
 
 
 @dataclass(frozen=True)
@@ -71,6 +74,24 @@ def get_dashboard_state(session_state: MutableMapping[str, Any]) -> DashboardSta
     if start_date > end_date:
         raise ValueError("Dashboard start date must not be after end date")
     return DashboardState(portfolio, benchmark, start_date, end_date)
+
+
+def set_dashboard_data(
+    session_state: MutableMapping[str, Any],
+    dashboard_data: DashboardData,
+) -> None:
+    """Store the validated selected dataset for use by dashboard pages."""
+    if not isinstance(dashboard_data, DashboardData):
+        raise ValueError("dashboard_data must be a DashboardData")
+    session_state[DASHBOARD_DATA_KEY] = dashboard_data
+
+
+def get_dashboard_data(session_state: MutableMapping[str, Any]) -> DashboardData:
+    """Return the selected dataset stored by the dashboard entrypoint."""
+    dashboard_data = session_state.get(DASHBOARD_DATA_KEY)
+    if not isinstance(dashboard_data, DashboardData):
+        raise ValueError("Dashboard data is not initialized")
+    return dashboard_data
 
 
 def _valid_date_range(
