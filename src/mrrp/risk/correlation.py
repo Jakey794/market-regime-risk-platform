@@ -89,9 +89,7 @@ def compute_diversification_ratio(
 
     asset_volatility = complete_returns.std(ddof=1)
     weighted_asset_volatility = float(asset_volatility.dot(aligned_weights))
-    portfolio_volatility = float(
-        complete_returns.dot(aligned_weights).std(ddof=1)
-    )
+    portfolio_volatility = float(complete_returns.dot(aligned_weights).std(ddof=1))
     if not np.isfinite(portfolio_volatility) or portfolio_volatility <= 0:
         raise ValueError("Portfolio volatility must be positive and finite")
 
@@ -136,14 +134,10 @@ def build_correlation_summary(
                 "mean_pairwise_corr": compute_mean_pairwise_correlation(
                     aligned_returns
                 ),
-                "max_pairwise_corr": compute_max_pairwise_correlation(
-                    aligned_returns
-                ),
+                "max_pairwise_corr": compute_max_pairwise_correlation(aligned_returns),
                 "current_rolling_corr": current_rolling,
                 "corr_percentile": correlation_percentile,
-                "correlation_regime": classify_correlation_regime(
-                    rolling_correlation
-                ),
+                "correlation_regime": classify_correlation_regime(rolling_correlation),
                 "diversification_ratio": compute_diversification_ratio(
                     aligned_returns,
                     aligned_weights,

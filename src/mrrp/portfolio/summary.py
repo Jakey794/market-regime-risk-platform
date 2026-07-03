@@ -120,13 +120,9 @@ def build_portfolio_risk_summary(
             portfolio_returns,
             benchmark_returns,
         ),
-        concentration_label=classify_concentration_risk(
-            portfolio_config.holdings
-        ),
+        concentration_label=classify_concentration_risk(portfolio_config.holdings),
         correlation_regime=str(correlation["correlation_regime"]),
-        effective_holdings=compute_effective_num_holdings(
-            portfolio_config.holdings
-        ),
+        effective_holdings=compute_effective_num_holdings(portfolio_config.holdings),
         top_3_weight=compute_top_n_weight(portfolio_config.holdings, n=3),
         mean_pairwise_corr=float(correlation["mean_pairwise_corr"]),
         diversification_ratio=float(correlation["diversification_ratio"]),

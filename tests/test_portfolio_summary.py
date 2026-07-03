@@ -102,11 +102,7 @@ def test_portfolio_summary_no_missing_fields(
     values = build_summary_cards(result)
 
     assert all(value is not None for value in values.values())
-    numeric_values = [
-        value
-        for value in values.values()
-        if isinstance(value, float)
-    ]
+    numeric_values = [value for value in values.values() if isinstance(value, float)]
     assert np.isfinite(numeric_values).all()
 
 

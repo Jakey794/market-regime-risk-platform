@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import pandas as pd
 
-from mrrp.risk.returns import cumulative_returns, log_returns, simple_returns
-
 
 def compute_asset_returns(
     prices: pd.DataFrame,
     method: str = "simple",
 ) -> pd.DataFrame:
     """Compute asset returns and remove the initial undefined-return row."""
+    from mrrp.risk.returns import log_returns, simple_returns
+
     if not isinstance(prices, pd.DataFrame):
         raise ValueError("Prices must be a pandas DataFrame")
 
@@ -38,6 +38,8 @@ def compute_cumulative_returns(
     returns: pd.Series | pd.DataFrame,
 ) -> pd.Series | pd.DataFrame:
     """Compound periodic returns into a cumulative return path."""
+    from mrrp.risk.returns import cumulative_returns
+
     return cumulative_returns(returns)
 
 
@@ -61,9 +63,7 @@ def align_returns_and_weights(
         str(ticker) for ticker in weights.index if ticker not in returns.columns
     ]
     if missing_tickers:
-        raise ValueError(
-            f"Weights reference missing return columns: {missing_tickers}"
-        )
+        raise ValueError(f"Weights reference missing return columns: {missing_tickers}")
 
     ordered_tickers = weights.index.tolist()
     return returns.loc[:, ordered_tickers], weights.reindex(ordered_tickers)

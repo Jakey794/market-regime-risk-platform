@@ -62,7 +62,9 @@ def _validate_weight_series(weights: pd.Series) -> None:
         raise ValueError("Holdings cannot be empty")
     if weights.index.has_duplicates:
         raise ValueError("Holding tickers must be unique")
-    if any(not isinstance(ticker, str) or not ticker.strip() for ticker in weights.index):
+    if any(
+        not isinstance(ticker, str) or not ticker.strip() for ticker in weights.index
+    ):
         raise ValueError("Holding tickers must be non-empty strings")
     if is_bool_dtype(weights.dtype) or not is_numeric_dtype(weights.dtype):
         raise ValueError("Weights must be numeric")

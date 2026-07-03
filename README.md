@@ -29,6 +29,42 @@ The portfolio risk engine now includes:
 - Historical VaR/CVaR, worst-period returns, skewness, and kurtosis
 - An integrated numeric portfolio risk summary against a benchmark
 
+## Week 3: Portfolio Risk Engine
+
+Week 3 packages the metric primitives into a reusable portfolio analysis layer:
+
+- Typed YAML portfolio configuration with weight, ticker, benchmark, currency,
+  and short-position validation
+- Aligned asset and weighted portfolio returns without silent normalization
+- Concentration diagnostics including HHI, effective holdings, top-weight
+  exposure, entropy, and a concentration-risk label
+- Static and rolling correlation analysis with a current correlation-regime
+  classification and diversification ratio
+- Asset, portfolio, rolling, and up/down beta against a configured benchmark
+- Marginal, component, and percentage contribution to portfolio variance
+- A typed `PortfolioRiskSummary` plus dashboard-ready exposure, correlation,
+  contribution, and summary-card builders
+
+The package API keeps data preparation separate from risk math:
+
+```python
+from mrrp.portfolio import (
+    build_portfolio_risk_summary,
+    build_summary_cards,
+    load_portfolio_config,
+)
+from mrrp.data.cache import load_parquet
+
+config = load_portfolio_config("configs/sample_portfolio.yaml")
+prices = load_parquet("data/processed/adjusted_close.parquet")
+summary = build_portfolio_risk_summary(prices, config)
+cards = build_summary_cards(summary)
+```
+
+See `notebooks/02_portfolio_risk_engine.ipynb` for the complete reproducible
+workflow and `reports/week_3_portfolio_risk_notes.md` for engineering notes and
+limitations.
+
 ## Quickstart
 
 ```bash

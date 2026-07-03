@@ -89,12 +89,9 @@ def compute_rolling_portfolio_beta(
     rolling_covariance = aligned["asset"].rolling(window).cov(aligned["benchmark"])
     rolling_variance = aligned["benchmark"].rolling(window).var(ddof=1)
     completed_variance = rolling_variance.dropna()
-    if (
-        not completed_variance.empty
-        and (
-            not np.isfinite(completed_variance.to_numpy()).all()
-            or completed_variance.eq(0).any()
-        )
+    if not completed_variance.empty and (
+        not np.isfinite(completed_variance.to_numpy()).all()
+        or completed_variance.eq(0).any()
     ):
         raise ValueError("Benchmark variance must be positive and finite")
 

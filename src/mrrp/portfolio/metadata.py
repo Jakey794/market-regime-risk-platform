@@ -63,9 +63,13 @@ def compute_group_exposure(
         index=pd.Index(groups, name=normalized_group_key),
         name="weight",
     )
-    return exposure.groupby(level=0, sort=False).sum().sort_values(
-        ascending=False,
-        kind="stable",
+    return (
+        exposure.groupby(level=0, sort=False)
+        .sum()
+        .sort_values(
+            ascending=False,
+            kind="stable",
+        )
     )
 
 

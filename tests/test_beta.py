@@ -96,9 +96,7 @@ def test_portfolio_beta_known_relationship() -> None:
 
 def test_asset_betas_known_relationship() -> None:
     benchmark = pd.Series([-0.03, -0.01, 0.01, 0.02, 0.04])
-    returns = pd.DataFrame(
-        {"DOUBLE": 2.0 * benchmark, "HALF": 0.5 * benchmark}
-    )
+    returns = pd.DataFrame({"DOUBLE": 2.0 * benchmark, "HALF": 0.5 * benchmark})
 
     result = compute_asset_betas(returns, benchmark)
 

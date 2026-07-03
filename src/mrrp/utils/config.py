@@ -124,7 +124,7 @@ def load_portfolio_config(path: str | Path) -> PortfolioConfig:
     """Load and validate a portfolio config."""
     data = load_yaml(path)
 
-    required_fields = {"name", "benchmark", "weights"}
+    required_fields = {"name", "benchmark"}
     missing = required_fields - set(data)
 
     if missing:
@@ -134,7 +134,7 @@ def load_portfolio_config(path: str | Path) -> PortfolioConfig:
 
     name = data["name"]
     benchmark = data["benchmark"]
-    weights = data["weights"]
+    weights = data.get("weights", data.get("holdings"))
 
     if not isinstance(name, str) or not name.strip():
         raise ConfigError("'name' must be a non-empty string")
@@ -143,7 +143,9 @@ def load_portfolio_config(path: str | Path) -> PortfolioConfig:
         raise ConfigError("'benchmark' must be a non-empty string")
 
     if not isinstance(weights, dict) or not weights:
-        raise ConfigError("'weights' must be a non-empty mapping of ticker to weight")
+        raise ConfigError(
+            "Portfolio config must contain a non-empty 'holdings' mapping"
+        )
 
     normalized_weights: dict[str, float] = {}
     for ticker, weight in weights.items():
