@@ -77,10 +77,28 @@ After downloading the data, open `notebooks/01_data_audit.ipynb` from the
 repository root to review ticker coverage, missing data, normalized prices, and
 recent daily returns.
 
+## Week 4 Dashboard Shell
+
+Start the Streamlit dashboard from the repository root:
+
+```bash
+make dashboard
+```
+
+The multipage shell reads `data/processed/adjusted_close.parquet` and
+`configs/sample_portfolio.yaml` to initialize shared portfolio, benchmark, and
+date controls. Portfolio Overview, Risk Metrics, Correlation & Beta, and Data
+Quality pages provide explicit placeholders for later analytical views.
+
+The dashboard reports historical estimates for research purposes. It does not
+yet render analytical charts or include regime models, stress tests, backtests,
+portfolio editing, or live data refresh, and it is not financial advice.
+
 ## Repository Structure
 
 ```text
 configs/       ETF universe and portfolio configuration
+app/           Streamlit dashboard entrypoint
 data/          Raw and processed parquet data
 notebooks/     Research and data audit notebooks
 reports/       Demo notes and generated research outputs
