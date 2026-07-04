@@ -24,9 +24,10 @@ def test_dashboard_shell_renders_default_page() -> None:
 
     assert not app.exception
     assert app.title[0].value == "Portfolio Overview"
-    assert len(app.metric) == 3
+    assert len(app.metric) == 12
     assert len(app.sidebar.selectbox) == 2
     assert len(app.sidebar.date_input) == 1
+    assert len(app.get("plotly_chart")) == 5
     assert not app.error
 
 
