@@ -36,7 +36,9 @@ from mrrp.utils.config import ConfigError
 
 
 ROLLING_WINDOW = 63
-ASSET_METADATA_PATH = Path(__file__).resolve().parents[2] / "configs" / "asset_metadata.yaml"
+ASSET_METADATA_PATH = (
+    Path(__file__).resolve().parents[2] / "configs" / "asset_metadata.yaml"
+)
 
 
 render_page_header(
@@ -77,15 +79,17 @@ try:
     ).rename("Rolling mean pairwise correlation")
     correlation_matrix = compute_correlation_matrix(data.asset_returns)
 
-    portfolio_beta = compute_portfolio_beta(data.portfolio_returns, data.benchmark_returns)
+    portfolio_beta = compute_portfolio_beta(
+        data.portfolio_returns, data.benchmark_returns
+    )
     rolling_portfolio_beta = compute_rolling_portfolio_beta(
         data.portfolio_returns,
         data.benchmark_returns,
         window=ROLLING_WINDOW,
     ).rename("Rolling portfolio beta")
-    asset_betas = compute_asset_betas(data.asset_returns, data.benchmark_returns).sort_values(
-        ascending=False
-    )
+    asset_betas = compute_asset_betas(
+        data.asset_returns, data.benchmark_returns
+    ).sort_values(ascending=False)
 
     hhi = compute_hhi(holdings)
     effective_holdings = compute_effective_num_holdings(holdings)
@@ -113,6 +117,9 @@ render_metric_cards(
         (
             "Mean pairwise correlation",
             format_decimal(correlation_summary["mean_pairwise_corr"]),
+            "Average correlation across all holding pairs; values near 1.0 "
+            "suggest holdings move together with little diversification "
+            "benefit.",
         ),
         (
             "Max pairwise correlation",
@@ -155,7 +162,10 @@ with st.expander("What do these metrics mean?"):
     )
 render_metric_cards(
     [
-        (f"Portfolio beta vs {data.portfolio_config.benchmark}", format_decimal(portfolio_beta)),
+        (
+            f"Portfolio beta vs {data.portfolio_config.benchmark}",
+            format_decimal(portfolio_beta),
+        ),
     ]
 )
 left_column, right_column = st.columns(2)
@@ -192,7 +202,12 @@ with st.expander("What do these metrics mean?"):
     )
 render_metric_cards(
     [
-        ("HHI", format_decimal(hhi, decimals=3)),
+        (
+            "HHI",
+            format_decimal(hhi, decimals=3),
+            "Herfindahl-Hirschman Index of holding weights; ranges from "
+            "near 0 (very diversified) to 1.0 (a single holding).",
+        ),
         ("Effective number of holdings", format_decimal(effective_holdings)),
         ("Top-1 weight", format_percentage(top_1_weight)),
         ("Top-3 weight", format_percentage(top_3_weight)),
@@ -220,11 +235,15 @@ with st.expander("What does this show?"):
     )
 try:
     asset_metadata = load_asset_metadata(ASSET_METADATA_PATH)
-    factor_exposure = compute_group_exposure(holdings, asset_metadata, group_key="factor_proxy")
+    factor_exposure = compute_group_exposure(
+        holdings, asset_metadata, group_key="factor_proxy"
+    )
 except (FileNotFoundError, ConfigError) as exc:
     st.warning(f"Sector/factor proxy exposure is unavailable: {exc}")
 else:
-    st.caption("Approximate proxy grouping for sample ETFs only, not a true factor model.")
+    st.caption(
+        "Approximate proxy grouping for sample ETFs only, not a true factor model."
+    )
     st.plotly_chart(
         build_bar_figure(
             factor_exposure,

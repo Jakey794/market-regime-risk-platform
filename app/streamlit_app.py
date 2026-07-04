@@ -61,6 +61,14 @@ def render_shared_sidebar(options: DashboardOptions) -> None:
             key=DATE_RANGE_KEY,
         )
         st.divider()
+        if st.button(
+            "Refresh cached data",
+            help="Clear cached price and portfolio data and reload. Run "
+            "`make data` first if the underlying file itself is stale.",
+        ):
+            load_dashboard_options.clear()
+            load_dashboard_dataset.clear()
+            st.rerun()
         st.caption("Risk modeling dashboard—not a prediction app or financial advice.")
 
 
@@ -104,10 +112,11 @@ def run_navigation() -> None:
 def main() -> None:
     """Initialize shared state and run the selected dashboard page."""
     try:
-        options = load_dashboard_options(
-            str(PRICES_PATH),
-            str(PORTFOLIO_CONFIG_PATH),
-        )
+        with st.spinner("Loading market data..."):
+            options = load_dashboard_options(
+                str(PRICES_PATH),
+                str(PORTFOLIO_CONFIG_PATH),
+            )
     except FileNotFoundError:
         st.error("Processed price data is unavailable. Run `make data` and try again.")
         st.stop()
@@ -118,13 +127,14 @@ def main() -> None:
     render_shared_sidebar(options)
     state = get_dashboard_state(st.session_state)
     try:
-        data = load_dashboard_dataset(
-            str(PRICES_PATH),
-            str(PORTFOLIO_CONFIG_PATH),
-            start_date=state.start_date,
-            end_date=state.end_date,
-            benchmark=state.benchmark,
-        )
+        with st.spinner("Preparing portfolio analytics..."):
+            data = load_dashboard_dataset(
+                str(PRICES_PATH),
+                str(PORTFOLIO_CONFIG_PATH),
+                start_date=state.start_date,
+                end_date=state.end_date,
+                benchmark=state.benchmark,
+            )
     except InsufficientObservationsError as exc:
         st.warning(str(exc))
         st.stop()

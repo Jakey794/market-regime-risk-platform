@@ -21,8 +21,17 @@ from mrrp.risk.drawdown import (
     worst_drawdown_periods,
 )
 from mrrp.risk.performance import calmar_ratio, sharpe_ratio, sortino_ratio
-from mrrp.risk.tail import historical_cvar, historical_var, worst_return, worst_rolling_return
-from mrrp.risk.volatility import annualized_return, annualized_volatility, rolling_volatility
+from mrrp.risk.tail import (
+    historical_cvar,
+    historical_var,
+    worst_return,
+    worst_rolling_return,
+)
+from mrrp.risk.volatility import (
+    annualized_return,
+    annualized_volatility,
+    rolling_volatility,
+)
 
 
 ROLLING_WINDOWS = (21, 63, 252)
@@ -100,7 +109,12 @@ render_metric_cards(
         ),
         ("Sharpe ratio", format_or_na(sharpe_ratio(returns), format_decimal)),
         ("Sortino ratio", format_or_na(sortino_ratio(returns), format_decimal)),
-        ("Calmar ratio", format_or_na(calmar_ratio(returns), format_decimal)),
+        (
+            "Calmar ratio",
+            format_or_na(calmar_ratio(returns), format_decimal),
+            "Annualized return divided by maximum drawdown; higher is "
+            "better, more return per unit of worst historical loss.",
+        ),
     ]
 )
 
@@ -109,7 +123,9 @@ for column, window in zip((left_column, middle_column, right_column), ROLLING_WI
     with column:
         st.plotly_chart(
             build_time_series_figure(
-                latest_rolling_volatility[window].rename(f"Rolling {window}D volatility"),
+                latest_rolling_volatility[window].rename(
+                    f"Rolling {window}D volatility"
+                ),
                 title=f"Rolling {window}-day volatility",
                 yaxis_title="Annualized volatility",
                 tickformat=".0%",
@@ -128,7 +144,10 @@ render_metric_cards(
     [
         ("Current drawdown", format_percentage(current_drawdown(returns))),
         ("Max drawdown", format_percentage(max_drawdown(returns))),
-        ("Drawdown duration (periods)", format_decimal(drawdown_duration(returns), decimals=0)),
+        (
+            "Drawdown duration (periods)",
+            format_decimal(drawdown_duration(returns), decimals=0),
+        ),
     ]
 )
 if worst_drawdowns.empty:
@@ -158,7 +177,12 @@ render_metric_cards(
         ("VaR 95", format_percentage(historical_var(returns, confidence=0.95))),
         ("VaR 99", format_percentage(historical_var(returns, confidence=0.99))),
         ("CVaR 95", format_percentage(historical_cvar(returns, confidence=0.95))),
-        ("CVaR 99", format_percentage(historical_cvar(returns, confidence=0.99))),
+        (
+            "CVaR 99",
+            format_percentage(historical_cvar(returns, confidence=0.99)),
+            "Average daily return on the worst 1% of historical days; more "
+            "sensitive to tail risk than VaR.",
+        ),
         ("Worst daily return", format_percentage(worst_return(returns))),
         (
             "Worst weekly return",

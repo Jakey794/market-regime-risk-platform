@@ -88,11 +88,35 @@ render_metric_cards(
         ("Annualized volatility", format_percentage(summary.annualized_volatility)),
         ("Current drawdown", format_percentage(summary.current_drawdown)),
         ("Max drawdown", format_percentage(summary.max_drawdown)),
-        ("Rolling beta vs benchmark", format_decimal(latest_rolling_beta)),
-        ("Historical VaR 95", format_percentage(summary.var_95)),
-        ("Historical CVaR 95", format_percentage(summary.cvar_95)),
-        ("HHI concentration", format_decimal(hhi, decimals=3)),
-        ("Effective number of holdings", format_decimal(summary.effective_holdings)),
+        (
+            "Rolling beta vs benchmark",
+            format_decimal(latest_rolling_beta),
+            "Sensitivity to the benchmark over the trailing window; 1.0 means "
+            "the portfolio tends to move in line with the benchmark.",
+        ),
+        (
+            "Historical VaR 95",
+            format_percentage(summary.var_95),
+            "The 5th-percentile historical daily return; a rough estimate of "
+            "a bad but not worst-case daily loss.",
+        ),
+        (
+            "Historical CVaR 95",
+            format_percentage(summary.cvar_95),
+            "The average daily return on days at or below the VaR 95 threshold.",
+        ),
+        (
+            "HHI concentration",
+            format_decimal(hhi, decimals=3),
+            "Herfindahl-Hirschman Index of holding weights; ranges from "
+            "near 0 (very diversified) to 1.0 (a single holding).",
+        ),
+        (
+            "Effective number of holdings",
+            format_decimal(summary.effective_holdings),
+            "Inverse of HHI; the number of equally-weighted holdings that "
+            "would produce the same concentration.",
+        ),
     ]
 )
 
