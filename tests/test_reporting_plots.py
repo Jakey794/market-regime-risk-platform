@@ -5,6 +5,8 @@ import plotly.graph_objects as go
 import pytest
 
 from mrrp.reporting import (
+    build_bar_figure,
+    build_correlation_heatmap_figure,
     build_histogram_figure,
     build_return_comparison_figure,
     build_time_series_figure,
@@ -73,3 +75,52 @@ def test_histogram_figure_rejects_empty_series() -> None:
             xaxis_title="Daily return",
             tickformat=".1%",
         )
+
+
+def test_bar_figure_preserves_given_order() -> None:
+    values = pd.Series({"QQQ": 1.2, "SPY": 0.9}, name="Beta")
+
+    figure = build_bar_figure(
+        values,
+        title="Asset beta",
+        xaxis_title="Asset",
+        yaxis_title="Beta",
+        tickformat=".2f",
+    )
+
+    assert isinstance(figure.data[0], go.Bar)
+    assert list(figure.data[0].x) == ["QQQ", "SPY"]
+    assert list(figure.data[0].y) == [1.2, 0.9]
+    assert figure.layout.title.text == "Asset beta"
+    assert figure.layout.yaxis.tickformat == ".2f"
+
+
+def test_bar_figure_rejects_empty_series() -> None:
+    with pytest.raises(ValueError, match="must not be empty"):
+        build_bar_figure(
+            pd.Series(dtype=float),
+            title="Asset beta",
+            xaxis_title="Asset",
+            yaxis_title="Beta",
+            tickformat=".2f",
+        )
+
+
+def test_correlation_heatmap_figure_contains_matrix_values() -> None:
+    matrix = pd.DataFrame(
+        {"SPY": [1.0, 0.8], "QQQ": [0.8, 1.0]},
+        index=["SPY", "QQQ"],
+    )
+
+    figure = build_correlation_heatmap_figure(matrix, title="Latest correlation")
+
+    assert isinstance(figure.data[0], go.Heatmap)
+    assert list(figure.data[0].x) == ["SPY", "QQQ"]
+    assert list(figure.data[0].y) == ["SPY", "QQQ"]
+    assert figure.data[0].z.tolist() == [[1.0, 0.8], [0.8, 1.0]]
+    assert figure.layout.title.text == "Latest correlation"
+
+
+def test_correlation_heatmap_figure_rejects_empty_matrix() -> None:
+    with pytest.raises(ValueError, match="must not be empty"):
+        build_correlation_heatmap_figure(pd.DataFrame())

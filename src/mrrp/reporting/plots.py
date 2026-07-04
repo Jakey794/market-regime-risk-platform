@@ -87,6 +87,63 @@ def build_histogram_figure(
     return figure
 
 
+def build_bar_figure(
+    values: pd.Series,
+    *,
+    title: str,
+    xaxis_title: str,
+    yaxis_title: str,
+    tickformat: str,
+) -> go.Figure:
+    """Build a single-series bar chart from precomputed, pre-ordered values."""
+    _validate_series(values, name="values")
+    figure = go.Figure(
+        go.Bar(
+            x=values.index.astype(str),
+            y=values,
+            name=values.name or yaxis_title,
+        )
+    )
+    figure.update_layout(
+        title=title,
+        height=380,
+        margin={"l": 20, "r": 20, "t": 55, "b": 20},
+        xaxis_title=xaxis_title,
+        yaxis_title=yaxis_title,
+        yaxis_tickformat=tickformat,
+        showlegend=False,
+    )
+    return figure
+
+
+def build_correlation_heatmap_figure(
+    correlation_matrix: pd.DataFrame,
+    *,
+    title: str = "Asset correlation",
+) -> go.Figure:
+    """Build a diverging heatmap from a precomputed asset correlation matrix."""
+    _validate_matrix(correlation_matrix, name="correlation_matrix")
+    labels = correlation_matrix.columns.astype(str)
+    figure = go.Figure(
+        go.Heatmap(
+            z=correlation_matrix.to_numpy(),
+            x=labels,
+            y=labels,
+            zmin=-1,
+            zmax=1,
+            colorscale="RdBu",
+            reversescale=True,
+            texttemplate="%{z:.2f}",
+        )
+    )
+    figure.update_layout(
+        title=title,
+        height=380,
+        margin={"l": 20, "r": 20, "t": 55, "b": 20},
+    )
+    return figure
+
+
 def build_weights_figure(weights: pd.Series) -> go.Figure:
     """Build an asset-weight bar chart from validated portfolio weights."""
     _validate_series(weights, name="weights")
@@ -133,5 +190,12 @@ def _style_time_series(
 def _validate_series(values: pd.Series, *, name: str) -> None:
     if not isinstance(values, pd.Series):
         raise ValueError(f"{name} must be a pandas Series")
+    if values.empty:
+        raise ValueError(f"{name} must not be empty")
+
+
+def _validate_matrix(values: pd.DataFrame, *, name: str) -> None:
+    if not isinstance(values, pd.DataFrame):
+        raise ValueError(f"{name} must be a pandas DataFrame")
     if values.empty:
         raise ValueError(f"{name} must not be empty")
