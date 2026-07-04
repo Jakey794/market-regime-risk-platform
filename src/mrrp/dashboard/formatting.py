@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+from collections.abc import Callable
 from datetime import date
 from numbers import Real
 
@@ -34,3 +36,12 @@ def format_decimal(value: Real, decimals: int = 2) -> str:
     if isinstance(value, bool) or not isinstance(value, Real):
         raise ValueError("value must be numeric")
     return f"{float(value):.{decimals}f}"
+
+
+def format_or_na(value: Real, formatter: Callable[[Real], str]) -> str:
+    """Format a value with ``formatter``, or return ``"N/A"`` if it is NaN."""
+    if isinstance(value, bool) or not isinstance(value, Real):
+        raise ValueError("value must be numeric")
+    if math.isnan(float(value)):
+        return "N/A"
+    return formatter(value)

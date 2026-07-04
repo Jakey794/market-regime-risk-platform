@@ -6,7 +6,12 @@ from pathlib import Path
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from mrrp.dashboard.formatting import format_date_range, humanize_identifier
+from mrrp.dashboard.formatting import (
+    format_date_range,
+    format_or_na,
+    format_percentage,
+    humanize_identifier,
+)
 from mrrp.dashboard.state import (
     BENCHMARK_KEY,
     DATE_RANGE_KEY,
@@ -29,6 +34,18 @@ def test_dashboard_shell_renders_default_page() -> None:
     assert len(app.sidebar.date_input) == 1
     assert len(app.get("plotly_chart")) == 5
     assert not app.error
+
+
+def test_risk_metrics_page_renders() -> None:
+    app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
+    app.switch_page("pages/2_Risk_Metrics.py").run()
+
+    assert not app.exception
+    assert not app.error
+    assert app.title[0].value == "Risk Metrics"
+    assert len(app.metric) == 21
+    assert len(app.get("plotly_chart")) == 5
+    assert len(app.get("dataframe")) == 1
 
 
 def test_dashboard_state_initializes_and_repairs_selections() -> None:
@@ -63,3 +80,11 @@ def test_dashboard_formatting_is_deterministic() -> None:
 
     with pytest.raises(ValueError, match="must not be after"):
         format_date_range(date(2024, 2, 1), date(2024, 1, 1))
+
+
+def test_format_or_na_formats_valid_values_and_falls_back_on_nan() -> None:
+    assert format_or_na(0.1234, format_percentage) == "12.34%"
+    assert format_or_na(float("nan"), format_percentage) == "N/A"
+
+    with pytest.raises(ValueError, match="must be numeric"):
+        format_or_na(True, format_percentage)

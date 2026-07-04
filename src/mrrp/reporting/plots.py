@@ -65,6 +65,28 @@ def build_time_series_figure(
     )
 
 
+def build_histogram_figure(
+    returns: pd.Series,
+    *,
+    title: str,
+    xaxis_title: str,
+    tickformat: str,
+) -> go.Figure:
+    """Build a return-distribution histogram from precomputed periodic returns."""
+    _validate_series(returns, name="returns")
+    figure = go.Figure(go.Histogram(x=returns, name=xaxis_title))
+    figure.update_layout(
+        title=title,
+        height=380,
+        margin={"l": 20, "r": 20, "t": 55, "b": 20},
+        xaxis_title=xaxis_title,
+        xaxis_tickformat=tickformat,
+        yaxis_title="Frequency",
+        showlegend=False,
+    )
+    return figure
+
+
 def build_weights_figure(weights: pd.Series) -> go.Figure:
     """Build an asset-weight bar chart from validated portfolio weights."""
     _validate_series(weights, name="weights")

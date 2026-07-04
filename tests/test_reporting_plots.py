@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 import pandas as pd
+import plotly.graph_objects as go
+import pytest
 
 from mrrp.reporting import (
+    build_histogram_figure,
     build_return_comparison_figure,
     build_time_series_figure,
     build_weights_figure,
@@ -44,3 +47,29 @@ def test_weights_figure_orders_largest_weight_first() -> None:
 
     assert list(figure.data[0].x) == ["SPY", "QQQ"]
     assert list(figure.data[0].y) == [0.7, 0.3]
+
+
+def test_histogram_figure_contains_return_values() -> None:
+    returns = pd.Series([0.01, -0.02, 0.015, -0.01])
+
+    figure = build_histogram_figure(
+        returns,
+        title="Daily return distribution",
+        xaxis_title="Daily return",
+        tickformat=".1%",
+    )
+
+    assert isinstance(figure.data[0], go.Histogram)
+    assert list(figure.data[0].x) == list(returns)
+    assert figure.layout.title.text == "Daily return distribution"
+    assert figure.layout.xaxis.tickformat == ".1%"
+
+
+def test_histogram_figure_rejects_empty_series() -> None:
+    with pytest.raises(ValueError, match="must not be empty"):
+        build_histogram_figure(
+            pd.Series(dtype=float),
+            title="Daily return distribution",
+            xaxis_title="Daily return",
+            tickformat=".1%",
+        )

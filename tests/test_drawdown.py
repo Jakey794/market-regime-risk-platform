@@ -9,6 +9,7 @@ from mrrp.risk.drawdown import (
     drawdown_series,
     max_drawdown,
     rolling_max_drawdown,
+    worst_drawdown_periods,
 )
 
 
@@ -104,3 +105,63 @@ def test_rolling_max_drawdown_rejects_invalid_window(window: int) -> None:
 def test_empty_returns_raise_value_error() -> None:
     with pytest.raises(ValueError, match="valid observation"):
         drawdown_series(pd.Series(dtype=float))
+
+
+@pytest.fixture
+def two_episode_returns() -> pd.Series:
+    index = pd.date_range("2025-01-01", periods=7, freq="D")
+    wealth = pd.Series([1.0, 0.8, 1.0, 1.0, 0.9, 1.0, 1.0], index=index)
+    return wealth.pct_change().fillna(0.0)
+
+
+def test_worst_drawdown_periods_ranks_by_depth(
+    two_episode_returns: pd.Series,
+) -> None:
+    result = worst_drawdown_periods(two_episode_returns, top_n=5)
+
+    assert len(result) == 2
+    assert result.iloc[0]["depth"] == pytest.approx(-0.2)
+    assert result.iloc[1]["depth"] == pytest.approx(-0.1)
+    assert result.iloc[0]["start"] == two_episode_returns.index[0]
+    assert result.iloc[0]["trough"] == two_episode_returns.index[1]
+    assert result.iloc[0]["recovery"] == two_episode_returns.index[2]
+    assert result.iloc[0]["duration"] == 1
+    assert result.iloc[1]["start"] == two_episode_returns.index[3]
+    assert result.iloc[1]["trough"] == two_episode_returns.index[4]
+    assert result.iloc[1]["recovery"] == two_episode_returns.index[5]
+    assert result.iloc[1]["duration"] == 1
+
+
+def test_worst_drawdown_periods_respects_top_n(
+    two_episode_returns: pd.Series,
+) -> None:
+    result = worst_drawdown_periods(two_episode_returns, top_n=1)
+
+    assert len(result) == 1
+    assert result.iloc[0]["depth"] == pytest.approx(-0.2)
+
+
+def test_worst_drawdown_periods_marks_unrecovered_episode(
+    known_wealth_returns: pd.Series,
+) -> None:
+    result = worst_drawdown_periods(known_wealth_returns.iloc[:-1], top_n=5)
+
+    assert len(result) == 1
+    assert result.iloc[0]["start"] == known_wealth_returns.index[1]
+    assert result.iloc[0]["trough"] == known_wealth_returns.index[4]
+    assert pd.isna(result.iloc[0]["recovery"])
+    assert result.iloc[0]["duration"] == 3
+
+
+def test_worst_drawdown_periods_handles_no_drawdown() -> None:
+    returns = pd.Series([0.0, 0.10, 0.05, 0.02])
+
+    result = worst_drawdown_periods(returns)
+
+    assert result.empty
+
+
+@pytest.mark.parametrize("top_n", [0, -1, 1.5])
+def test_worst_drawdown_periods_rejects_invalid_top_n(top_n: object) -> None:
+    with pytest.raises(ValueError, match="top_n"):
+        worst_drawdown_periods(pd.Series([0.0, -0.1]), top_n=top_n)
