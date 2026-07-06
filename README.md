@@ -65,40 +65,69 @@ See `notebooks/02_portfolio_risk_engine.ipynb` for the complete reproducible
 workflow and `reports/week_3_portfolio_risk_notes.md` for engineering notes and
 limitations.
 
-## Quickstart
+## How to Run
 
 ```bash
 uv sync
-make data
-make check
+make data       # download and cache adjusted-close prices
+make dashboard  # launch the Streamlit dashboard
+make test       # run the automated test suite
+make check      # lint, format-check, and test
 ```
 
-After downloading the data, open `notebooks/01_data_audit.ipynb` from the
-repository root to review ticker coverage, missing data, normalized prices, and
-recent daily returns.
+After downloading the data, you can also open `notebooks/01_data_audit.ipynb`
+from the repository root to review ticker coverage, missing data, normalized
+prices, and recent daily returns.
 
-## Week 4 Dashboard Shell
+## Week 4: Dashboard
 
-Start the Streamlit dashboard from the repository root:
-
-```bash
-make dashboard
-```
-
-The multipage shell reads `data/processed/adjusted_close.parquet` and
+Week 4 completed a baseline, four-page Streamlit dashboard built entirely on
+the Week 2/3 risk engine — no new financial logic was added for the
+dashboard itself. Start it with `make dashboard` from the repository root;
+the shell reads `data/processed/adjusted_close.parquet` and
 `configs/sample_portfolio.yaml` to initialize shared portfolio, benchmark, and
-date controls. Portfolio Overview, Risk Metrics, Correlation & Beta, and Data
-Quality pages provide explicit placeholders for later analytical views.
+date-range controls used by every page.
 
-The dashboard reports historical estimates for research purposes. It does not
-yet render analytical charts or include regime models, stress tests, backtests,
+- **Portfolio Overview** — headline summary cards (return, volatility,
+  drawdown, VaR/CVaR, beta, concentration) plus cumulative return, rolling
+  volatility/drawdown/beta, and weight charts.
+- **Risk Metrics** — return and volatility statistics, rolling volatility at
+  multiple windows, drawdown history and worst-drawdown episodes, and
+  historical VaR/CVaR with a return-distribution chart.
+- **Correlation & Beta** — pairwise correlation summary and heatmap, rolling
+  correlation, portfolio and asset beta against the selected benchmark, and
+  an approximate sector/factor proxy exposure chart (labeled as a proxy, not
+  a factor model).
+- **Data Quality** — selected tickers/benchmark, coverage and missing-value
+  reporting per ticker, duplicate-date and alignment checks, data freshness
+  relative to today, and a portfolio weight/benchmark validation summary.
+
+Screenshots of each page can be captured by running `make dashboard` and
+saving them under `reports/screenshots/` (e.g. `1_portfolio_overview.png`,
+`2_risk_metrics.png`, `3_correlation_beta.png`, `4_data_quality.png`) — this
+is a manual step, not automated by any script in this repository.
+
+The dashboard reports historical, deterministic estimates for research
+purposes only. It does not include regime models, stress tests, backtests,
 portfolio editing, or live data refresh, and it is not financial advice.
+
+## Architecture
+
+```text
+app (Streamlit pages)
+  -> dashboard adapters (src/mrrp/dashboard: loaders, state, formatting, components)
+    -> core risk engine (src/mrrp/risk, src/mrrp/portfolio)
+      -> processed data (data/processed/*.parquet)
+```
+
+Streamlit pages stay thin: they call into the dashboard adapters and the
+core risk engine, and never reimplement financial calculations themselves.
 
 ## Repository Structure
 
 ```text
 configs/       ETF universe and portfolio configuration
-app/           Streamlit dashboard entrypoint
+app/           Streamlit dashboard entrypoint and pages
 data/          Raw and processed parquet data
 notebooks/     Research and data audit notebooks
 reports/       Demo notes and generated research outputs
@@ -110,16 +139,20 @@ tests/         Automated tests
 
 ## Project Scope
 
-- Volatility regime detection
-- Correlation regime detection
-- Drawdown risk
-- Beta vs benchmark
-- Portfolio concentration risk
-- Sector and factor exposure proxies
-- Stress tests
-- Regime model comparison
-- Simple no-lookahead backtests
-- Quarterly risk memo generation
+**Delivered (Weeks 1-4):** ETF data ingestion and validation, the portfolio
+risk/return/drawdown/tail-risk metrics engine, concentration diagnostics,
+static and rolling correlation with a simple percentile-based correlation
+label (a rule, not a statistical model), asset/portfolio beta, variance risk
+contribution, and the four-page dashboard described above.
+
+**Planned, not yet started:**
+
+- Volatility and correlation **regime models** (e.g. HMM/GMM-based regime
+  detection, distinct from today's simple percentile-based correlation
+  label) — begins Week 6.
+- **Stress testing** — begins Week 8.
+- **Backtesting** (simple, no-lookahead) — begins Week 9.
+- Quarterly risk memo generation — no target week set yet.
 
 ## Limitations
 
@@ -127,3 +160,4 @@ tests/         Automated tests
   inconsistent observations.
 - This project is not financial advice.
 - This project is not a return prediction system.
+- This project does not perform live trading or live order execution.

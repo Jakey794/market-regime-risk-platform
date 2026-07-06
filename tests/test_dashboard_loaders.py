@@ -27,6 +27,25 @@ holdings:
     )
 
 
+def test_load_dashboard_data_loads_real_sample_portfolio_config(tmp_path) -> None:
+    prices_path = tmp_path / "prices.parquet"
+    tickers = ["SPY", "QQQ", "XIU.TO", "EFA", "EEM", "XLK"]
+    pd.DataFrame(
+        {ticker: [100.0, 101.0] for ticker in tickers},
+        index=pd.date_range("2024-01-01", periods=2),
+    ).to_parquet(prices_path)
+
+    prices, portfolio = load_dashboard_data(
+        prices_path,
+        "configs/sample_portfolio.yaml",
+    )
+
+    assert not prices.empty
+    assert portfolio.name == "sample_global_equity_portfolio"
+    assert portfolio.benchmark == "SPY"
+    assert sorted(portfolio.holdings.index) == sorted(tickers)
+
+
 def test_load_dashboard_data_uses_canonical_portfolio_config(tmp_path) -> None:
     prices_path = tmp_path / "prices.parquet"
     portfolio_path = tmp_path / "portfolio.yaml"
@@ -145,6 +164,8 @@ def test_load_dashboard_dataset_uses_existing_return_functions(tmp_path) -> None
         minimum_complete_returns=2,
     )
 
+    assert not result.asset_returns.empty
+    assert not result.portfolio_returns.empty
     assert result.asset_returns.columns.tolist() == ["SPY", "QQQ"]
     assert result.portfolio_returns.tolist() == pytest.approx([0.02, 0.0019607843])
     assert result.benchmark_returns.tolist() == pytest.approx([0.02, -0.0098039216])

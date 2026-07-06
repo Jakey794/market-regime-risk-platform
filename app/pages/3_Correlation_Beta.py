@@ -142,7 +142,7 @@ with left_column:
             yaxis_title="Mean pairwise correlation",
             tickformat=".2f",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 with right_column:
     st.plotly_chart(
@@ -150,7 +150,7 @@ with right_column:
             correlation_matrix,
             title="Latest asset correlation",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 st.subheader("Beta")
@@ -177,7 +177,7 @@ with left_column:
             yaxis_title="Beta",
             tickformat=".2f",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 with right_column:
     st.plotly_chart(
@@ -188,7 +188,7 @@ with right_column:
             yaxis_title="Beta",
             tickformat=".2f",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 st.subheader("Concentration")
@@ -222,7 +222,7 @@ st.plotly_chart(
         yaxis_title="Risk contribution",
         tickformat=".0%",
     ),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.subheader("Sector/factor proxy exposure")
@@ -252,7 +252,7 @@ else:
             yaxis_title="Portfolio weight",
             tickformat=".0%",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 render_disclaimer()

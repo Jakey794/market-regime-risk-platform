@@ -130,7 +130,7 @@ for column, window in zip((left_column, middle_column, right_column), ROLLING_WI
                 yaxis_title="Annualized volatility",
                 tickformat=".0%",
             ),
-            use_container_width=True,
+            width="stretch",
         )
 
 st.subheader("Drawdown")
@@ -153,7 +153,7 @@ render_metric_cards(
 if worst_drawdowns.empty:
     st.write("No drawdown episodes occurred over the selected period.")
 else:
-    st.dataframe(worst_drawdowns, use_container_width=True)
+    st.dataframe(worst_drawdowns, width="stretch")
 st.plotly_chart(
     build_time_series_figure(
         drawdown_series(returns).rename("Drawdown"),
@@ -161,7 +161,7 @@ st.plotly_chart(
         yaxis_title="Drawdown",
         tickformat=".0%",
     ),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.subheader("Tail risk")
@@ -201,7 +201,7 @@ st.plotly_chart(
         xaxis_title="Daily return",
         tickformat=".1%",
     ),
-    use_container_width=True,
+    width="stretch",
 )
 
 render_disclaimer()

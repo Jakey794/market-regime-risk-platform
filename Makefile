@@ -7,7 +7,7 @@ data:
 	uv run python scripts/download_data.py --config configs/default_universe.yaml --out data/processed/adjusted_close.parquet
 
 dashboard:
-	uv run streamlit run app/streamlit_app.py
+	PYTHONPATH=src uv run streamlit run app/streamlit_app.py
 
 test:
 	uv run pytest

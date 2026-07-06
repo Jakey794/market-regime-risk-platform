@@ -127,7 +127,7 @@ st.plotly_chart(
         cumulative_benchmark,
         benchmark_name=data.portfolio_config.benchmark,
     ),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.subheader("Rolling risk")
@@ -140,7 +140,7 @@ with left_column:
             yaxis_title="Annualized volatility",
             tickformat=".0%",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 with right_column:
     st.plotly_chart(
@@ -150,7 +150,7 @@ with right_column:
             yaxis_title="Drawdown",
             tickformat=".0%",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 
 left_column, right_column = st.columns(2)
@@ -162,12 +162,12 @@ with left_column:
             yaxis_title="Beta",
             tickformat=".2f",
         ),
-        use_container_width=True,
+        width="stretch",
     )
 with right_column:
     st.plotly_chart(
         build_weights_figure(data.portfolio_config.holdings),
-        use_container_width=True,
+        width="stretch",
     )
 
 render_disclaimer()

@@ -69,7 +69,7 @@ render_metric_cards(
 render_quality_warnings(data)
 
 st.subheader("Missing observations")
-st.dataframe(missing_report, use_container_width=True)
+st.dataframe(missing_report, width="stretch")
 dropped_rows = len(data.prices) - data.complete_observations
 render_metric_cards(
     [
