@@ -76,9 +76,7 @@ def test_load_asset_metadata() -> None:
 
 def test_group_exposure_sums_to_one() -> None:
     metadata = load_asset_metadata("configs/asset_metadata.yaml")
-    weights = pd.Series(
-        {"SPY": 0.35, "QQQ": 0.15, "XIU.TO": 0.20, "EFA": 0.30}
-    )
+    weights = pd.Series({"SPY": 0.35, "QQQ": 0.15, "XIU.TO": 0.20, "EFA": 0.30})
 
     result = compute_group_exposure(weights, metadata, group_key="region")
 

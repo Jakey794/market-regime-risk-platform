@@ -84,9 +84,7 @@ def test_compute_asset_returns_log() -> None:
 
     result = compute_asset_returns(prices, method="log")
 
-    assert result["SPY"].tolist() == pytest.approx(
-        [np.log(1.1), np.log(0.9)]
-    )
+    assert result["SPY"].tolist() == pytest.approx([np.log(1.1), np.log(0.9)])
     assert result.index.equals(index[1:])
 
 
