@@ -36,3 +36,4 @@ postgres_data/
 
 # Generated feature artifacts
 data/processed/*.parquet
+data/processed/regime_feature_metadata.json
