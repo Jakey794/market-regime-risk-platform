@@ -71,6 +71,20 @@ def test_data_quality_page_renders() -> None:
     assert len(app.get("dataframe")) == 1
 
 
+def test_regime_feature_diagnostics_page_renders() -> None:
+    app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
+    app.switch_page("pages/5_Regime_Feature_Diagnostics.py").run()
+
+    assert not app.exception
+    assert not app.error
+    assert app.title[0].value == "Regime Feature Diagnostics"
+    assert len(app.sidebar.radio) == 1
+    assert len(app.sidebar.multiselect) == 1
+    assert len(app.sidebar.date_input) == 1
+    assert len(app.get("dataframe")) == 2
+    assert len(app.get("plotly_chart")) == 2
+
+
 def test_dashboard_state_initializes_and_repairs_selections() -> None:
     session_state: dict[str, object] = {
         PORTFOLIO_KEY: "missing",

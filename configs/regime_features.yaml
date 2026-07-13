@@ -1,0 +1,10 @@
+windows:
+  short: 21
+  medium: 63
+  long: 252
+annualization_factor: 252
+train_end: "2021-12-31"
+thresholds:
+  high_vol_percentile: 0.75
+  high_corr_percentile: 0.75
+  drawdown_warning: -0.10

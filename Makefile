@@ -1,4 +1,4 @@
-.PHONY: setup data dashboard test lint format check clean
+.PHONY: setup data dashboard features feature-check test lint format check clean
 
 setup:
 	uv sync
@@ -8,6 +8,12 @@ data:
 
 dashboard:
 	PYTHONPATH=src uv run streamlit run app/streamlit_app.py
+
+features:
+	uv run python -m mrrp.features.build_features --feature-config configs/regime_features.yaml
+
+feature-check:
+	uv run python -m mrrp.features.validate_features
 
 test:
 	uv run pytest

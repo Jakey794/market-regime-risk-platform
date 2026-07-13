@@ -8,6 +8,7 @@
 venv/
 __pycache__/
 *.py[cod]
+*.egg-info/
 .pytest_cache/
 .ruff_cache/
 .mypy_cache/
@@ -32,3 +33,6 @@ yarn-error.log*
 
 # Docker / local data
 postgres_data/
+
+# Generated feature artifacts
+data/processed/*.parquet

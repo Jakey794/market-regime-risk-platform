@@ -97,6 +97,11 @@ def run_navigation() -> None:
                 title="Data Quality",
                 icon=":material/fact_check:",
             ),
+            st.Page(
+                "pages/5_Regime_Feature_Diagnostics.py",
+                title="Regime Feature Diagnostics",
+                icon=":material/insights:",
+            ),
         ]
         st.navigation(pages).run()
         return
