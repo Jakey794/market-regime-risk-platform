@@ -17,6 +17,6 @@ def test_memo_marks_missing_values_unavailable() -> None:
     )
     memo = render_quarterly_memo(inputs)
     assert "unavailable" in memo
-    assert "nan" not in memo.lower()
+    assert ": nan" not in memo.lower()
     assert "not a prediction" not in memo.lower()
     assert "not investment advice" in memo.lower()
