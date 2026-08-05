@@ -14,39 +14,48 @@ provide buy/sell instructions or personalised financial advice.
 
 ## Current volatility regime
 
-unavailable
+Normal volatility
 
 ## Current correlation regime
 
-unavailable
+High correlation
 
 ## Regime-model agreement / disagreement
 
-unavailable
+Models currently agree on 'calm' (threshold=calm, gmm=calm).
 
 ## Drawdown and tail risk
 
-- Current / recent drawdown context: unavailable
-- Historical VaR (95%): unavailable
-- Historical CVaR (95%): unavailable
+- Current / recent drawdown context: -0.52%
+- Historical VaR (95%): -1.77%
+- Historical CVaR (95%): -2.89%
 
 ## Benchmark beta
 
-Portfolio beta vs SPY: **unavailable**
+Portfolio beta vs SPY: **0.97**
 
 ## Concentration and risk contribution
 
-Concentration label: **unavailable**
+Concentration label: **Moderate**
 
 Top risk contributors:
 
-- No contribution data supplied.
+- SPY: 34.44%
+- QQQ: 15.93%
+- XIU.TO: 15.69%
+- EFA: 15.50%
+- EEM: 12.96%
 
 ## Factor / sector proxy exposure
 
 These are ETF sector/factor **proxies**, not a statistical factor model.
 
-- No factor-proxy exposures supplied.
+- broad_us: 35.00%
+- canada_large_cap: 20.00%
+- us_growth_tech_heavy: 15.00%
+- developed_ex_us: 15.00%
+- emerging_markets: 10.00%
+- technology: 5.00%
 
 ## Stress-test results
 
@@ -59,6 +68,9 @@ These are ETF sector/factor **proxies**, not a statistical factor model.
 - equity_down_10: -8.80%
 - emerging_market_shock: -2.00%
 - tech_sector_proxy_shock: -0.75%
+- benchmark_beta_shock: -9.71%
+- volatility_shock: -3.54%
+- correlation_shock: -2.44%
 
 ## Backtest evidence
 
@@ -102,3 +114,4 @@ guarantee of future performance or alpha.
 
 ---
 Generated deterministically from platform outputs. Not investment advice.
+

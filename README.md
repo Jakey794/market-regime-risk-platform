@@ -102,15 +102,15 @@ package code rather than reimplement financial logic.
 ## Repository Structure
 
 ```text
-configs/       Universe, portfolio, feature, and (upcoming) model configs
-app/           Streamlit entrypoint and pages
-data/          Raw/processed/sample data (generated artifacts mostly ignored)
-notebooks/     Research notebooks
-reports/       Notes, memos, architecture, screenshots
+configs/       Universe, portfolio, feature, model, stress, backtest configs
+app/           Streamlit entrypoint and nine research pages
+data/          Sample demo data + generated processed artifacts (mostly ignored)
+notebooks/     Feature, model, backtest, and failure-analysis notebooks
+reports/       Memo example, final research report, architecture notes
 scripts/       Reproducible CLI workflows
-src/mrrp/      Project package
-tests/         Automated tests
-.github/       GitHub Actions workflows
+src/mrrp/      Project package (data, risk, features, models, stress, backtest, reporting)
+tests/         Offline unit tests and Streamlit AppTests
+.github/       GitHub Actions CI
 ```
 
 ## Validation Commands

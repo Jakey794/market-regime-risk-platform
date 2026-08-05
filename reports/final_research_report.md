@@ -70,6 +70,9 @@ Metrics are family-aware and are not all directly comparable.
 - equity_down_10: -8.80%
 - emerging_market_shock: -2.00%
 - tech_sector_proxy_shock: -0.75%
+- benchmark_beta_shock: -9.71%
+- volatility_shock: -3.54%
+- correlation_shock: -2.44%
 
 ## Backtest methodology
 
@@ -97,7 +100,7 @@ These are historical simulations only.
 
 ## Failure analysis
 
-Known failure modes include short ETF history for older stress windows, HMM non-convergence on weak signals, unstable cluster numbering without economic relabeling, and over-interpreting backtest Sharpe as alpha.
+1) Regime-label instability across seeds/specs; economic relabeling helps but does not create unique true states. 2) State-identification ambiguity without a unique causal map. 3) Window sensitivity of trailing features (21d/63d/252d). 4) Number-of-state sensitivity in interpretability and duration stats. 5) Non-stationarity of risk regimes after the training window. 6) ETF proxy limitations for sector/region/factor exposures. 7) Free-data history gaps and revisions. 8) Crisis correlation breakdown versus calm-sample diversification. 9) VaR/CVaR sample dependence and unseen-tail limits. 10) Simplified proportional transaction costs. 11) Bull-market underperformance of defensive/de-risking rules. 12) Backtest overfitting and model-selection bias if rules are chosen after seeing results.
 
 ## Limitations
 

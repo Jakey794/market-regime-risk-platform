@@ -76,11 +76,10 @@
 - Launch the Streamlit dashboard: `make dashboard`.
 - Build raw and train-scaled regime features: `make features`.
 - Validate persisted regime feature artifacts: `make feature-check`.
-- Fit and validate regime models: `make models` / `make model-check`
-  (added as the model package lands).
-- Run stress tests: `make stress` (added with the stress engine).
-- Run backtests: `make backtest` (added with the backtest engine).
-- Generate reports: `make report` (added with reporting modules).
+- Fit and validate regime models: `make models` / `make model-check`.
+- Run stress tests: `make stress`.
+- Run backtests: `make backtest`.
+- Generate reports: `make report`.
 - Run tests: `make test` (runs `uv run pytest`).
 - Run lint: `make lint` (runs `uv run ruff check .`).
 - Run the full validation suite: `make check` (Ruff lint, Ruff format check,
