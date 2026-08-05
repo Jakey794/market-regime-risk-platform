@@ -209,18 +209,18 @@ make dashboard       # already exists — document it
 ## Definition-of-done checklist
 
 - [ ] GitHub CI green
-- [ ] `make check` passes
+- [x] `make check` passes (305 tests on 2026-08-05)
 - [ ] `make data` works or fails with clear provider message
-- [ ] `make features` / `make feature-check` pass
-- [ ] New model / stress / backtest / report commands exist and pass
-- [ ] Every Streamlit page renders under AppTest
+- [x] `make features` / `make feature-check` pass
+- [x] New model / stress / backtest / report commands exist and pass
+- [x] Every Streamlit page renders under AppTest
 - [ ] Dashboard launches locally
-- [ ] No-look-ahead tests pass
-- [ ] No network-dependent unit tests
-- [ ] README / AGENTS / CLAUDE / Cursor rules agree
-- [ ] `README 2.md` removed if redundant
-- [ ] Generated full datasets ignored
-- [ ] Research report and example memo reproducible from pipeline outputs
+- [x] No-look-ahead tests pass
+- [x] No network-dependent unit tests
+- [x] README / AGENTS / CLAUDE / Cursor rules agree
+- [x] `README 2.md` removed if redundant
+- [x] Generated full datasets ignored
+- [x] Research report and example memo reproducible from pipeline outputs
 - [ ] Working tree clean; milestone commits; no push/tag without approval
 
 ## Non-goals / framing

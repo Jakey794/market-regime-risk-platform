@@ -104,6 +104,33 @@ def test_regime_feature_diagnostics_missing_artifacts_is_stable(
     assert any("make features" in warning.value.lower() for warning in app.warning)
 
 
+def test_regime_detection_page_renders(regime_feature_artifact_dir: Path) -> None:
+    app = AppTest.from_file(str(APP_PATH), default_timeout=30).run()
+    app.switch_page("pages/6_Regime_Detection.py").run()
+
+    assert not app.exception
+    assert app.title[0].value == "Regime Detection"
+    assert len(app.selectbox) >= 2
+    assert regime_feature_artifact_dir.exists()
+
+
+@pytest.mark.parametrize(
+    ("page", "title"),
+    [
+        ("pages/7_Stress_Tests.py", "Stress Tests"),
+        ("pages/8_Backtest_Lab.py", "Backtest Lab"),
+        ("pages/9_Quarterly_Memo.py", "Quarterly Memo"),
+    ],
+)
+def test_v1_dashboard_pages_render(page: str, title: str) -> None:
+    app = AppTest.from_file(str(APP_PATH), default_timeout=30).run()
+    app.switch_page(page).run()
+
+    assert not app.exception
+    assert not app.error
+    assert app.title[0].value == title
+
+
 def test_dashboard_state_initializes_and_repairs_selections() -> None:
     session_state: dict[str, object] = {
         PORTFOLIO_KEY: "missing",

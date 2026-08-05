@@ -37,3 +37,10 @@ postgres_data/
 # Generated feature artifacts
 data/processed/*.parquet
 data/processed/regime_feature_metadata.json
+data/processed/regime_models/
+data/processed/backtest/
+data/processed/stress_results.json
+
+# Keep deterministic deployment/demo data tracked
+!data/sample/
+!data/sample/**

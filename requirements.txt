@@ -1,0 +1,12 @@
+# Streamlit Cloud entrypoint dependencies; canonical development lock is uv.lock.
+hmmlearn>=0.3.3
+numpy>=2.4.6
+pandas>=3.0.3
+plotly>=6.7.0
+pyarrow>=24.0.0
+pydantic>=2.13.4
+pyyaml>=6.0.3
+ruptures>=1.1.10
+scikit-learn>=1.9.0
+streamlit>=1.58.0
+yfinance>=1.4.1

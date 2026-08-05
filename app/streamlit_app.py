@@ -96,6 +96,26 @@ def run_navigation() -> None:
                 title="Regime Feature Diagnostics",
                 icon=":material/insights:",
             ),
+            st.Page(
+                "pages/6_Regime_Detection.py",
+                title="Regime Detection",
+                icon=":material/schema:",
+            ),
+            st.Page(
+                "pages/7_Stress_Tests.py",
+                title="Stress Tests",
+                icon=":material/crisis_alert:",
+            ),
+            st.Page(
+                "pages/8_Backtest_Lab.py",
+                title="Backtest Lab",
+                icon=":material/science:",
+            ),
+            st.Page(
+                "pages/9_Quarterly_Memo.py",
+                title="Quarterly Memo",
+                icon=":material/description:",
+            ),
         ]
         st.navigation(pages).run()
         return

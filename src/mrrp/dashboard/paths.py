@@ -8,6 +8,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PROCESSED_DIR = REPO_ROOT / "data" / "processed"
+DEFAULT_SAMPLE_PRICES = REPO_ROOT / "data" / "sample" / "synthetic_prices.parquet"
 DEFAULT_CONFIG_DIR = REPO_ROOT / "configs"
 
 FEATURE_DIR_ENV = "MRRP_FEATURE_DIR"
@@ -45,11 +46,12 @@ def regime_feature_paths() -> RegimeFeaturePaths:
 
 
 def prices_path() -> Path:
-    """Return the adjusted-close prices path used by the dashboard shell."""
+    """Return processed prices, falling back to tracked synthetic demo data."""
     override = os.environ.get(PRICES_PATH_ENV)
     if override:
         return Path(override)
-    return processed_data_dir() / "adjusted_close.parquet"
+    processed = processed_data_dir() / "adjusted_close.parquet"
+    return processed if processed.exists() else DEFAULT_SAMPLE_PRICES
 
 
 def portfolio_config_path() -> Path:
