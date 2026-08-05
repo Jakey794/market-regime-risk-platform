@@ -1,0 +1,25 @@
+rebalance_frequency: M
+transaction_cost_bps: 10
+signal_shift: 1
+periods_per_year: 252
+vol_target: 0.12
+high_vol_threshold: 0.20
+high_corr_threshold: 0.60
+drawdown_limit: -0.12
+min_risk_scalar: 0.30
+
+rules:
+  - static_benchmark
+  - volatility_target
+  - drawdown_guardrail
+  - high_vol_derisk
+  - high_corr_derisk
+  - combined_risk_aware
+
+defensive_allocation:
+  SPY: 0.40
+  QQQ: 0.05
+  XIU.TO: 0.25
+  EFA: 0.20
+  EEM: 0.05
+  XLK: 0.05
