@@ -65,18 +65,18 @@ These are ETF sector/factor **proxies**, not a statistical factor model.
 Historical simulation metrics for research comparison only. They are not a
 guarantee of future performance or alpha.
 
-- cagr: 0.0986
-- annualized_volatility: 0.1916
+- cagr: 9.86%
+- annualized_volatility: 19.16%
 - sharpe: 0.5146
 - sortino: 0.4791
-- max_drawdown: -0.5525
+- max_drawdown: -55.25%
 - calmar: 0.1785
-- tracking_error: 0.0399
-- turnover: 0.0000
-- transaction_cost_drag: 0.0000
-- worst_month: -0.2610
-- rolling_12m_return_last: 0.3855
-- fraction_outperforming_months: 0.5062
+- tracking_error: 3.99%
+- turnover: 0.00%
+- transaction_cost_drag: 0.00%
+- worst_month: -26.10%
+- rolling_12m_return_last: 38.55%
+- fraction_outperforming_months: 50.62%
 - underperformance_duration_days: 4002
 
 ## Review considerations

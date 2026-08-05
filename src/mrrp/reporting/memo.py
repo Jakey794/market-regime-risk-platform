@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-import math
 from typing import Any, Mapping
+
+from mrrp.reporting.formatting import format_named_metric, format_number
 
 
 @dataclass(frozen=True)
@@ -34,30 +35,28 @@ def render_quarterly_memo(inputs: MemoInputs) -> str:
     """Render a Markdown quarterly risk memo from computed outputs only."""
     stress_lines = (
         "\n".join(
-            f"- {name}: {_format_number(value, percent=True)}"
+            f"- {name}: {format_number(value, percent=True)}"
             for name, value in inputs.stress_results.items()
         )
         or "- No stress results supplied."
     )
     backtest_lines = (
         "\n".join(
-            f"- {name}: {value:.4f}"
-            if isinstance(value, float)
-            else f"- {name}: {value}"
+            f"- {name}: {format_named_metric(name, value)}"
             for name, value in inputs.backtest_metrics.items()
         )
         or "- No backtest metrics supplied."
     )
     contrib_lines = (
         "\n".join(
-            f"- {name}: {_format_number(value, percent=True)}"
+            f"- {name}: {format_number(value, percent=True)}"
             for name, value in inputs.top_risk_contributors.items()
         )
         or "- No contribution data supplied."
     )
     factor_lines = (
         "\n".join(
-            f"- {name}: {_format_number(value, percent=True)}"
+            f"- {name}: {format_number(value, percent=True)}"
             for name, value in inputs.factor_proxy_exposure.items()
         )
         or "- No factor-proxy exposures supplied."
@@ -93,13 +92,13 @@ provide buy/sell instructions or personalised financial advice.
 
 ## Drawdown and tail risk
 
-- Current / recent drawdown context: {_format_number(inputs.drawdown, percent=True)}
-- Historical VaR (95%): {_format_number(inputs.var_95, percent=True)}
-- Historical CVaR (95%): {_format_number(inputs.cvar_95, percent=True)}
+- Current / recent drawdown context: {format_number(inputs.drawdown, percent=True)}
+- Historical VaR (95%): {format_number(inputs.var_95, percent=True)}
+- Historical CVaR (95%): {format_number(inputs.cvar_95, percent=True)}
 
 ## Benchmark beta
 
-Portfolio beta vs {inputs.benchmark}: **{_format_number(inputs.benchmark_beta)}**
+Portfolio beta vs {inputs.benchmark}: **{format_number(inputs.benchmark_beta)}**
 
 ## Concentration and risk contribution
 
@@ -198,9 +197,3 @@ def write_memo_markdown(path: str, markdown: str) -> None:
         markdown if markdown.endswith("\n") else markdown + "\n",
         encoding="utf-8",
     )
-
-
-def _format_number(value: float, *, percent: bool = False) -> str:
-    if not math.isfinite(float(value)):
-        return "unavailable"
-    return f"{value:.2%}" if percent else f"{value:.2f}"
