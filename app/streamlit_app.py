@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import streamlit as st
 
 from mrrp.dashboard.components import (
@@ -17,6 +15,7 @@ from mrrp.dashboard.loaders import (
     load_dashboard_dataset,
     load_dashboard_options,
 )
+from mrrp.dashboard.paths import portfolio_config_path, prices_path
 from mrrp.dashboard.state import (
     BENCHMARK_KEY,
     DATE_RANGE_KEY,
@@ -32,11 +31,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
-
-
-ROOT_DIR = Path(__file__).resolve().parents[1]
-PRICES_PATH = ROOT_DIR / "data" / "processed" / "adjusted_close.parquet"
-PORTFOLIO_CONFIG_PATH = ROOT_DIR / "configs" / "sample_portfolio.yaml"
 
 
 def render_shared_sidebar(options: DashboardOptions) -> None:
@@ -102,6 +96,26 @@ def run_navigation() -> None:
                 title="Regime Feature Diagnostics",
                 icon=":material/insights:",
             ),
+            st.Page(
+                "pages/6_Regime_Detection.py",
+                title="Regime Detection",
+                icon=":material/schema:",
+            ),
+            st.Page(
+                "pages/7_Stress_Tests.py",
+                title="Stress Tests",
+                icon=":material/crisis_alert:",
+            ),
+            st.Page(
+                "pages/8_Backtest_Lab.py",
+                title="Backtest Lab",
+                icon=":material/science:",
+            ),
+            st.Page(
+                "pages/9_Quarterly_Memo.py",
+                title="Quarterly Memo",
+                icon=":material/description:",
+            ),
         ]
         st.navigation(pages).run()
         return
@@ -116,14 +130,19 @@ def run_navigation() -> None:
 
 def main() -> None:
     """Initialize shared state and run the selected dashboard page."""
+    price_file = prices_path()
+    portfolio_file = portfolio_config_path()
     try:
         with st.spinner("Loading market data..."):
             options = load_dashboard_options(
-                str(PRICES_PATH),
-                str(PORTFOLIO_CONFIG_PATH),
+                str(price_file),
+                str(portfolio_file),
             )
     except FileNotFoundError:
-        st.error("Processed price data is unavailable. Run `make data` and try again.")
+        st.error(
+            "Processed price data is unavailable. Run `make data` "
+            "(or set MRRP_PRICES_PATH to a demo dataset) and try again."
+        )
         st.stop()
     except (OSError, ValueError) as exc:
         st.error(f"Unable to initialize dashboard controls: {exc}")
@@ -134,8 +153,8 @@ def main() -> None:
     try:
         with st.spinner("Preparing portfolio analytics..."):
             data = load_dashboard_dataset(
-                str(PRICES_PATH),
-                str(PORTFOLIO_CONFIG_PATH),
+                str(price_file),
+                str(portfolio_file),
                 start_date=state.start_date,
                 end_date=state.end_date,
                 benchmark=state.benchmark,

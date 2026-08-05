@@ -12,6 +12,7 @@ from mrrp.dashboard.formatting import (
     format_percentage,
     humanize_identifier,
 )
+from mrrp.dashboard.paths import FEATURE_DIR_ENV
 from mrrp.dashboard.state import (
     BENCHMARK_KEY,
     DATE_RANGE_KEY,
@@ -71,7 +72,9 @@ def test_data_quality_page_renders() -> None:
     assert len(app.get("dataframe")) == 1
 
 
-def test_regime_feature_diagnostics_page_renders() -> None:
+def test_regime_feature_diagnostics_page_renders(
+    regime_feature_artifact_dir: Path,
+) -> None:
     app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
     app.switch_page("pages/5_Regime_Feature_Diagnostics.py").run()
 
@@ -83,6 +86,49 @@ def test_regime_feature_diagnostics_page_renders() -> None:
     assert len(app.sidebar.date_input) == 1
     assert len(app.get("dataframe")) == 2
     assert len(app.get("plotly_chart")) == 2
+    assert regime_feature_artifact_dir.exists()
+
+
+def test_regime_feature_diagnostics_missing_artifacts_is_stable(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv(FEATURE_DIR_ENV, str(tmp_path / "missing-features"))
+    app = AppTest.from_file(str(APP_PATH), default_timeout=15).run()
+    app.switch_page("pages/5_Regime_Feature_Diagnostics.py").run()
+
+    assert not app.exception
+    assert not app.error
+    assert app.title[0].value == "Regime Feature Diagnostics"
+    assert len(app.sidebar.radio) == 0
+    assert any("make features" in warning.value.lower() for warning in app.warning)
+
+
+def test_regime_detection_page_renders(regime_feature_artifact_dir: Path) -> None:
+    app = AppTest.from_file(str(APP_PATH), default_timeout=30).run()
+    app.switch_page("pages/6_Regime_Detection.py").run()
+
+    assert not app.exception
+    assert app.title[0].value == "Regime Detection"
+    assert len(app.selectbox) >= 2
+    assert regime_feature_artifact_dir.exists()
+
+
+@pytest.mark.parametrize(
+    ("page", "title"),
+    [
+        ("pages/7_Stress_Tests.py", "Stress Tests"),
+        ("pages/8_Backtest_Lab.py", "Backtest Lab"),
+        ("pages/9_Quarterly_Memo.py", "Quarterly Memo"),
+    ],
+)
+def test_v1_dashboard_pages_render(page: str, title: str) -> None:
+    app = AppTest.from_file(str(APP_PATH), default_timeout=30).run()
+    app.switch_page(page).run()
+
+    assert not app.exception
+    assert not app.error
+    assert app.title[0].value == title
 
 
 def test_dashboard_state_initializes_and_repairs_selections() -> None:

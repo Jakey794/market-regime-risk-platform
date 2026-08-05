@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import pandas as pd
 import plotly.graph_objects as go
 
@@ -142,6 +144,95 @@ def build_correlation_heatmap_figure(
         margin={"l": 20, "r": 20, "t": 55, "b": 20},
     )
     return figure
+
+
+def build_transition_heatmap_figure(
+    transition_matrix: pd.DataFrame | list[list[float]],
+    *,
+    labels: Sequence[str] | None = None,
+    title: str = "HMM transition matrix",
+) -> go.Figure:
+    """Build a heatmap for an HMM (or similar) transition matrix."""
+    import numpy as np
+
+    matrix = np.asarray(transition_matrix, dtype=float)
+    if matrix.ndim != 2 or matrix.shape[0] != matrix.shape[1]:
+        raise ValueError("transition_matrix must be square")
+    if labels is None:
+        labels = [f"State {idx}" for idx in range(matrix.shape[0])]
+    if len(labels) != matrix.shape[0]:
+        raise ValueError("labels must match transition_matrix dimension")
+    figure = go.Figure(
+        go.Heatmap(
+            z=matrix,
+            x=list(labels),
+            y=list(labels),
+            zmin=0,
+            zmax=1,
+            colorscale="Blues",
+            texttemplate="%{z:.2f}",
+        )
+    )
+    figure.update_layout(
+        title=title,
+        height=380,
+        margin={"l": 20, "r": 20, "t": 55, "b": 20},
+        xaxis_title="To state",
+        yaxis_title="From state",
+    )
+    return figure
+
+
+def build_regime_shaded_wealth_figure(
+    returns: pd.Series,
+    regime_labels: pd.Series,
+    *,
+    title: str = "Regime-shaded wealth",
+    change_points: Sequence[pd.Timestamp] | None = None,
+) -> go.Figure:
+    """Build a cumulative-wealth chart with regime markers and optional breaks."""
+    _validate_series(returns, name="returns")
+    _validate_series(regime_labels, name="regime_labels")
+    aligned = pd.concat(
+        [returns.rename("ret"), regime_labels.rename("regime")], axis=1
+    ).dropna()
+    if aligned.empty:
+        raise ValueError("returns and regime_labels have no overlapping dates")
+    wealth = (1.0 + aligned["ret"]).cumprod()
+    figure = go.Figure(
+        go.Scatter(
+            x=wealth.index,
+            y=wealth,
+            mode="lines",
+            name="Wealth",
+            line={"color": "#334155"},
+        )
+    )
+    for label in sorted(aligned["regime"].astype(str).unique()):
+        mask = aligned["regime"].astype(str) == label
+        figure.add_trace(
+            go.Scatter(
+                x=wealth.index[mask],
+                y=wealth.loc[mask],
+                mode="markers",
+                name=str(label),
+                marker={"size": 4},
+            )
+        )
+    if change_points:
+        for stamp in change_points:
+            figure.add_vline(
+                x=pd.Timestamp(stamp),
+                line_width=1,
+                line_dash="dot",
+                line_color="#94a3b8",
+            )
+    return _style_time_series(
+        figure,
+        title=title,
+        yaxis_title="Growth of $1",
+        tickformat=".2f",
+    )
 
 
 def build_weights_figure(weights: pd.Series) -> go.Figure:

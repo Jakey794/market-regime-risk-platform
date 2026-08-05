@@ -1,0 +1,43 @@
+historical_windows:
+  - name: global_financial_crisis
+    start: "2007-10-01"
+    end: "2009-03-31"
+    description: Global financial crisis window when ETF history permits.
+  - name: covid_crash
+    start: "2020-02-19"
+    end: "2020-03-23"
+    description: COVID crash selloff window.
+  - name: inflation_rate_shock_2022
+    start: "2022-01-01"
+    end: "2022-10-31"
+    description: 2022 inflation and rate-shock period.
+
+worst_rolling_windows: [21, 63, 126]
+
+deterministic:
+  - name: equity_down_10
+    scenario_type: deterministic_asset_shock
+    description: Direct -10% shock to major equity ETF holdings.
+    shocks:
+      SPY: -0.10
+      QQQ: -0.12
+      XIU.TO: -0.10
+      EFA: -0.10
+  - name: emerging_market_shock
+    scenario_type: emerging_market_shock
+    description: Direct emerging-market shock via EEM proxy.
+    shocks:
+      EEM: -0.20
+  - name: tech_sector_proxy_shock
+    scenario_type: sector_proxy_shock
+    description: Sector-proxy shock via XLK (not a full factor model).
+    shocks:
+      XLK: -0.15
+    metadata:
+      proxy_disclaimer: "XLK is a sector ETF proxy, not a statistical factor."
+
+regime_horizons: ["1d", "5d", "21d"]
+
+benchmark_shock: -0.10
+volatility_multiplier: 1.5
+target_correlation: 0.90

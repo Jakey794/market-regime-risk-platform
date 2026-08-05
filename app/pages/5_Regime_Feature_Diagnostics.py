@@ -17,17 +17,12 @@ from mrrp.dashboard.components import (
     render_page_header,
 )
 from mrrp.dashboard.formatting import format_decimal
+from mrrp.dashboard.paths import regime_feature_paths
 from mrrp.data.cache import load_parquet
 from mrrp.data.validators import report_missing_data
 from mrrp.reporting import build_correlation_heatmap_figure
 
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-RAW_FEATURES_PATH = ROOT_DIR / "data" / "processed" / "regime_features_raw.parquet"
-SCALED_FEATURES_PATH = (
-    ROOT_DIR / "data" / "processed" / "regime_features_scaled.parquet"
-)
-METADATA_PATH = ROOT_DIR / "data" / "processed" / "regime_feature_metadata.json"
 RUN_MAKE_FEATURES_MESSAGE = "Run `make features` to build the regime feature artifacts."
 DEFAULT_FEATURE_COUNT = 4
 
@@ -95,23 +90,31 @@ render_page_header(
     "or trading signals.",
 )
 
+feature_paths = regime_feature_paths()
 try:
     raw_features, scaled_features = load_feature_data(
-        str(RAW_FEATURES_PATH),
-        str(SCALED_FEATURES_PATH),
+        str(feature_paths.raw),
+        str(feature_paths.scaled),
     )
-    metadata = load_metadata(str(METADATA_PATH))
+    metadata = load_metadata(str(feature_paths.metadata))
 except FileNotFoundError as exc:
     st.warning(f"{exc} {RUN_MAKE_FEATURES_MESSAGE}")
+    st.info(
+        "Regime feature diagnostics are unavailable until artifacts are built. "
+        "Other dashboard pages that use processed prices remain available."
+    )
+    render_disclaimer()
     st.stop()
 except (OSError, ValueError) as exc:
     st.error(
         f"Unable to load regime feature artifacts: {exc} {RUN_MAKE_FEATURES_MESSAGE}"
     )
+    render_disclaimer()
     st.stop()
 
 if raw_features.empty or scaled_features.empty:
     st.error(f"Regime feature artifacts are empty. {RUN_MAKE_FEATURES_MESSAGE}")
+    render_disclaimer()
     st.stop()
 if not isinstance(raw_features.index, pd.DatetimeIndex) or not isinstance(
     scaled_features.index, pd.DatetimeIndex
@@ -119,6 +122,7 @@ if not isinstance(raw_features.index, pd.DatetimeIndex) or not isinstance(
     st.error(
         f"Regime feature artifacts must have a DatetimeIndex. {RUN_MAKE_FEATURES_MESSAGE}"
     )
+    render_disclaimer()
     st.stop()
 
 st.sidebar.header("Feature diagnostics")
@@ -153,6 +157,10 @@ else:
 
 st.subheader("Dataset overview")
 st.caption(f"Currently viewing: {view_mode} features")
+st.caption(
+    f"Data as-of {active_features.index.max().date()} · "
+    f"Artifacts: {feature_paths.raw.parent}"
+)
 render_metric_cards(
     [
         ("First date", str(active_features.index.min().date())),

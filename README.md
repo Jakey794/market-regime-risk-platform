@@ -1,158 +1,136 @@
 # Market Regime + Portfolio Risk Platform
 
-This project is a portfolio risk, regime detection, stress-testing, and backtesting
-platform. It is not a stock prediction app.
+A Python research platform for **portfolio risk measurement**, **market-regime
+analysis**, **stress testing**, and **no-look-ahead backtesting**.
 
-The repository is a Python research platform for studying how portfolios behave
-across changing market environments and producing interpretable risk outputs.
+This is **not** a stock-prediction app. It does not claim reliable alpha,
+guaranteed risk reduction, or investment performance.
 
-## Week 1 Status
+The goal is to study how portfolios behave across changing market environments
+and to produce interpretable, leakage-aware research outputs.
 
-- Config-driven ETF universe
-- Reproducible adjusted-close data ingestion
-- Parquet data cache
-- Data validation checks and missing-data reporting
-- Starter test suite
-- GitHub Actions CI
-- Starter data audit notebook
+## v1.0 status
 
-## Week 2 Metrics Engine
+| Week | Deliverable | Status |
+| --- | --- | --- |
+| 1 | Config-driven ETF ingestion, Parquet cache, validation | Complete |
+| 2 | Risk / return / drawdown / tail / performance metrics | Complete |
+| 3 | Portfolio config, concentration, correlation, beta, risk contribution | Complete |
+| 4 | Four-page Streamlit dashboard on the risk engine | Complete |
+| 5 | Leakage-safe regime feature engineering + diagnostics page | Complete |
+| 6 | Threshold, KMeans, GMM, HMM, and change-point models | Complete |
+| 7 | Historical, deterministic, and regime-conditioned stress tests | Complete |
+| 8 | Shifted-signal, cost-aware backtesting | Complete |
+| 9 | Quarterly memo and research-report generation | Complete |
+| 10 | Nine-page Streamlit research dashboard | Complete |
 
-The portfolio risk engine now includes:
+The implementation is production-shaped research software, not a live trading
+system. See `PROJECT_COMPLETION.md` for acceptance evidence and remaining limits.
 
-- Simple, logarithmic, cumulative, and weighted portfolio returns
-- Annualized return, volatility, rolling volatility, and EWMA volatility
-- Drawdown paths, maximum/current drawdown, and drawdown duration
-- Sharpe, Sortino, Calmar, tracking-error, and information ratios
-- Asset, rolling, and weighted portfolio beta
-- Rolling correlation matrices and mean pairwise correlation
-- Historical VaR/CVaR, worst-period returns, skewness, and kurtosis
-- An integrated numeric portfolio risk summary against a benchmark
-
-## Week 3: Portfolio Risk Engine
-
-Week 3 packages the metric primitives into a reusable portfolio analysis layer:
-
-- Typed YAML portfolio configuration with weight, ticker, benchmark, currency,
-  and short-position validation
-- Aligned asset and weighted portfolio returns without silent normalization
-- Concentration diagnostics including HHI, effective holdings, top-weight
-  exposure, entropy, and a concentration-risk label
-- Static and rolling correlation analysis with a current correlation-regime
-  classification and diversification ratio
-- Asset, portfolio, rolling, and up/down beta against a configured benchmark
-- Marginal, component, and percentage contribution to portfolio variance
-- A typed `PortfolioRiskSummary` plus dashboard-ready exposure, correlation,
-  contribution, and summary-card builders
-
-The package API keeps data preparation separate from risk math:
-
-```python
-from mrrp.portfolio import (
-    build_portfolio_risk_summary,
-    build_summary_cards,
-    load_portfolio_config,
-)
-from mrrp.data.cache import load_parquet
-
-config = load_portfolio_config("configs/sample_portfolio.yaml")
-prices = load_parquet("data/processed/adjusted_close.parquet")
-summary = build_portfolio_risk_summary(prices, config)
-cards = build_summary_cards(summary)
-```
-
-See `notebooks/02_portfolio_risk_engine.ipynb` for the complete reproducible
-workflow and `reports/week_3_portfolio_risk_notes.md` for engineering notes and
-limitations.
-
-## How to Run
+## Quickstart
 
 ```bash
 uv sync
-make data       # download and cache adjusted-close prices
-make dashboard  # launch the Streamlit dashboard
-make test       # run the automated test suite
-make check      # lint, format-check, and test
+make data        # download and cache adjusted-close prices
+make features    # build raw + train-scaled regime features
+make feature-check
+make models
+make stress
+make backtest
+make report
+make dashboard   # launch the Streamlit app
+make test
+make check       # ruff lint + format check + pytest
 ```
 
-After downloading the data, you can also open `notebooks/01_data_audit.ipynb`
-from the repository root to review ticker coverage, missing data, normalized
-prices, and recent daily returns.
+## What it demonstrates
 
-## Week 4: Dashboard
+- Config-driven ETF data validation and portfolio construction
+- Trailing risk features with chronological splits and train-only scaling
+- Interpretable, clustering, mixture, HMM, and change-point regime methods
+- Historical replay and explicitly labeled deterministic stress estimates
+- Shifted-signal backtests with turnover and transaction costs
+- Deterministic Markdown reporting and a nine-page Streamlit interface
+- Future-mutation tests proving later observations do not alter prior outputs
 
-Week 4 completed a baseline, four-page Streamlit dashboard built entirely on
-the Week 2/3 risk engine — no new financial logic was added for the
-dashboard itself. Start it with `make dashboard` from the repository root;
-the shell reads `data/processed/adjusted_close.parquet` and
-`configs/sample_portfolio.yaml` to initialize shared portfolio, benchmark, and
-date-range controls used by every page.
+```bash
+make features
+make feature-check
+```
 
-- **Portfolio Overview** — headline summary cards (return, volatility,
-  drawdown, VaR/CVaR, beta, concentration) plus cumulative return, rolling
-  volatility/drawdown/beta, and weight charts.
-- **Risk Metrics** — return and volatility statistics, rolling volatility at
-  multiple windows, drawdown history and worst-drawdown episodes, and
-  historical VaR/CVaR with a return-distribution chart.
-- **Correlation & Beta** — pairwise correlation summary and heatmap, rolling
-  correlation, portfolio and asset beta against the selected benchmark, and
-  an approximate sector/factor proxy exposure chart (labeled as a proxy, not
-  a factor model).
-- **Data Quality** — selected tickers/benchmark, coverage and missing-value
-  reporting per ticker, duplicate-date and alignment checks, data freshness
-  relative to today, and a portfolio weight/benchmark validation summary.
+## Dashboard
 
-Screenshots of each page can be captured by running `make dashboard` and
-saving them under `reports/screenshots/` (e.g. `1_portfolio_overview.png`,
-`2_risk_metrics.png`, `3_correlation_beta.png`, `4_data_quality.png`) — this
-is a manual step, not automated by any script in this repository.
+```bash
+make dashboard
+```
 
-The dashboard reports historical, deterministic estimates for research
-purposes only. It does not include regime models, stress tests, backtests,
-portfolio editing, or live data refresh, and it is not financial advice.
+Pages:
+
+1. Portfolio Overview
+2. Risk Metrics
+3. Correlation & Beta
+4. Data Quality
+5. Regime Feature Diagnostics
+6. Regime Detection
+7. Stress Tests
+8. Backtest Lab
+9. Quarterly Memo
+
+The dashboard reports historical, deterministic estimates for research purposes
+only. It is not financial advice.
 
 ## Architecture
 
-```text
-app (Streamlit pages)
-  -> dashboard adapters (src/mrrp/dashboard: loaders, state, formatting, components)
-    -> core risk engine (src/mrrp/risk, src/mrrp/portfolio)
-      -> processed data (data/processed/*.parquet)
+```mermaid
+flowchart LR
+  C[Versioned YAML] --> D[Data validation]
+  D --> F[Trailing features]
+  D --> R[Portfolio risk]
+  F --> M[Regime models]
+  R --> S[Stress tests]
+  F --> B[Backtests]
+  M --> B
+  M --> P[Reporting]
+  S --> P
+  B --> P
+  P --> A[Nine-page Streamlit app]
 ```
 
-Streamlit pages stay thin: they call into the dashboard adapters and the
-core risk engine, and never reimplement financial calculations themselves.
+Streamlit pages stay thin and call package APIs. Notebooks must call the same
+package code rather than reimplement financial logic.
 
 ## Repository Structure
 
 ```text
-configs/       ETF universe and portfolio configuration
-app/           Streamlit dashboard entrypoint and pages
-data/          Raw and processed parquet data
-notebooks/     Research and data audit notebooks
-reports/       Demo notes and generated research outputs
-scripts/       Reproducible command-line workflows
-src/mrrp/      Project package
-tests/         Automated tests
-.github/       GitHub Actions workflows
+configs/       Universe, portfolio, feature, model, stress, backtest configs
+app/           Streamlit entrypoint and nine research pages
+data/          Sample demo data + generated processed artifacts (mostly ignored)
+notebooks/     Feature, model, backtest, and failure-analysis notebooks
+reports/       Memo example, final research report, architecture notes
+scripts/       Reproducible CLI workflows
+src/mrrp/      Project package (data, risk, features, models, stress, backtest, reporting)
+tests/         Offline unit tests and Streamlit AppTests
+.github/       GitHub Actions CI
 ```
 
-## Project Scope
+## Validation Commands
 
-**Delivered (Weeks 1-4):** ETF data ingestion and validation, the portfolio
-risk/return/drawdown/tail-risk metrics engine, concentration diagnostics,
-static and rolling correlation with a simple percentile-based correlation
-label (a rule, not a statistical model), asset/portfolio beta, variance risk
-contribution, and the four-page dashboard described above.
-
-**Planned, not yet started:**
-
-- Volatility and correlation **regime models** (e.g. HMM/GMM-based regime
-  detection, distinct from today's simple percentile-based correlation
-  label) — begins Week 6.
-- **Stress testing** — begins Week 8.
-- **Backtesting** (simple, no-lookahead) — begins Week 9.
-- Quarterly risk memo generation — no target week set yet.
+| Command | Purpose |
+| --- | --- |
+| `make setup` | Install dependencies with `uv sync` |
+| `make data` | Build adjusted-close cache |
+| `make features` | Build regime feature artifacts |
+| `make feature-check` | Validate feature artifacts |
+| `make models` | Fit configured regime models |
+| `make stress` | Run configured stress scenarios |
+| `make backtest` | Run shifted-signal backtests |
+| `make report` | Generate Markdown reports |
+| `make dashboard` | Launch Streamlit |
+| `make test` | Run pytest |
+| `make lint` | Ruff lint |
+| `make check` | Lint + format check + tests |
+| `make format` | Apply Ruff formatting |
+| `make clean` | Remove local caches |
 
 ## Limitations
 
@@ -161,3 +139,19 @@ contribution, and the four-page dashboard described above.
 - This project is not financial advice.
 - This project is not a return prediction system.
 - This project does not perform live trading or live order execution.
+- Regime features describe historical risk conditions; they are not forecasts.
+- HMM and clustering state identities are sample- and specification-dependent.
+- Historical backtests can overfit research choices and use a simplified cost model.
+- The tracked sample dataset is deterministic and synthetic, for demos only.
+
+## Secret-free demo and deployment
+
+`data/sample/synthetic_prices.parquet` is clearly synthetic and lets the app run
+without data-provider credentials when processed prices are absent. Streamlit
+Cloud can install `requirements.txt` and launch `app/streamlit_app.py`.
+Screenshot placeholders for a future release are listed in `docs/DEMO_SCRIPT.md`;
+no screenshots are represented as completed assets.
+
+## License
+
+License terms are TBD pending owner approval. No ownership terms are implied.
