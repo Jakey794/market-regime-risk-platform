@@ -40,3 +40,4 @@ regime_horizons: ["1d", "5d", "21d"]
 
 benchmark_shock: -0.10
 volatility_multiplier: 1.5
+target_correlation: 0.90

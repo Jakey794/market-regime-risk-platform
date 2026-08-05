@@ -8,12 +8,18 @@ from pathlib import Path
 
 from mrrp.data.cache import load_parquet
 from mrrp.portfolio.config import load_portfolio_config
+from mrrp.portfolio.returns import compute_asset_returns
 from mrrp.risk.scenarios import load_stress_scenario_config
 from mrrp.risk.stress import (
+    benchmark_beta_shock,
+    correlation_shock_estimate,
     deterministic_asset_shock,
     historical_window_stress,
+    rank_stress_results,
+    volatility_shock_estimate,
     worst_rolling_stress,
 )
+from mrrp.utils.config import load_yaml
 
 
 def parse_args() -> argparse.Namespace:
@@ -30,7 +36,21 @@ def main() -> None:
     prices = load_parquet(args.prices)
     portfolio = load_portfolio_config(args.portfolio)
     config = load_stress_scenario_config(args.config)
+    raw_config = load_yaml(args.config)
     weights = portfolio.holdings
+    asset_prices = prices.loc[:, weights.index.intersection(prices.columns)]
+    asset_returns = compute_asset_returns(asset_prices, method="simple").dropna(
+        how="any"
+    )
+    benchmark = portfolio.benchmark
+    benchmark_returns = (
+        compute_asset_returns(prices.loc[:, [benchmark]], method="simple")[benchmark]
+        .reindex(asset_returns.index)
+        .dropna()
+    )
+    aligned_assets = asset_returns.reindex(benchmark_returns.index).dropna(how="any")
+    aligned_benchmark = benchmark_returns.reindex(aligned_assets.index)
+
     results = [
         *(
             historical_window_stress(prices, weights, item)
@@ -41,10 +61,28 @@ def main() -> None:
             for window in config.worst_rolling_windows
         ),
         *(deterministic_asset_shock(weights, item) for item in config.deterministic),
+        benchmark_beta_shock(
+            aligned_assets,
+            aligned_benchmark,
+            weights,
+            float(raw_config.get("benchmark_shock", -0.10)),
+        ),
+        volatility_shock_estimate(
+            aligned_assets,
+            weights,
+            float(raw_config.get("volatility_multiplier", 1.5)),
+        ),
+        correlation_shock_estimate(
+            aligned_assets,
+            weights,
+            float(raw_config.get("target_correlation", 0.90)),
+        ),
     ]
+    ranking = rank_stress_results(results)
     payload = {
         "portfolio": portfolio.name,
         "data_as_of": str(prices.index.max().date()),
+        "ranking": ranking.to_dict(orient="records"),
         "results": [
             {
                 "name": result.name,

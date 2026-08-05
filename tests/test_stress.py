@@ -2,12 +2,17 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
+import pytest
 
 from mrrp.risk.scenarios import DeterministicShockScenario, HistoricalWindowScenario
 from mrrp.risk.stress import (
+    benchmark_beta_shock,
+    correlation_shock_estimate,
     deterministic_asset_shock,
     historical_window_stress,
+    rank_stress_results,
     volatility_shock_estimate,
+    worst_loss_contributor,
     worst_rolling_stress,
 )
 
@@ -51,3 +56,36 @@ def test_deterministic_and_volatility_shocks_are_explicit_estimates() -> None:
     assert direct.portfolio_impact == -0.14
     assert estimate.methodology == "covariance_volatility_estimate"
     assert estimate.warnings
+    assert worst_loss_contributor(direct) == "B"
+
+
+def test_correlation_and_beta_shocks_disclose_approximation() -> None:
+    prices, weights = _portfolio()
+    returns = prices.pct_change().dropna()
+    corr = correlation_shock_estimate(returns, weights, 0.95)
+    beta = benchmark_beta_shock(returns, returns["A"], weights, -0.10)
+    assert corr.methodology == "covariance_volatility_estimate"
+    assert beta.methodology == "beta_approximation"
+    assert corr.warnings
+    assert beta.warnings
+    with pytest.raises(ValueError, match="target_correlation"):
+        correlation_shock_estimate(returns, weights, 1.5)
+
+
+def test_rank_stress_results_orders_worst_first() -> None:
+    prices, weights = _portfolio()
+    mild = deterministic_asset_shock(
+        weights,
+        DeterministicShockScenario(
+            "mild", "deterministic_asset_shock", {"A": -0.05}, "", {}
+        ),
+    )
+    severe = deterministic_asset_shock(
+        weights,
+        DeterministicShockScenario(
+            "severe", "deterministic_asset_shock", {"A": -0.20, "B": -0.20}, "", {}
+        ),
+    )
+    ranking = rank_stress_results([mild, severe])
+    assert ranking.iloc[0]["scenario"] == "severe"
+    assert ranking.iloc[0]["rank"] == 1

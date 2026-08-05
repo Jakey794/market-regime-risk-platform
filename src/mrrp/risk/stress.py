@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
@@ -200,6 +201,116 @@ def benchmark_beta_shock(
             "Beta-translated shocks are approximations, not historical replays.",
         ),
         diagnostics={"betas": betas.to_dict()},
+    )
+
+
+def worst_loss_contributor(result: StressScenarioResult) -> str | None:
+    """Return the asset with the most negative contribution, if any."""
+    contrib = result.asset_contribution.dropna()
+    if contrib.empty:
+        return None
+    return str(contrib.idxmin())
+
+
+def rank_stress_results(
+    results: Sequence[StressScenarioResult],
+) -> pd.DataFrame:
+    """Rank scenarios by ascending portfolio impact (worst loss first)."""
+    if not results:
+        return pd.DataFrame(
+            columns=[
+                "rank",
+                "scenario",
+                "methodology",
+                "portfolio_impact",
+                "worst_contributor",
+            ]
+        )
+    rows = []
+    for result in results:
+        rows.append(
+            {
+                "scenario": result.name,
+                "methodology": result.methodology,
+                "portfolio_impact": result.portfolio_impact,
+                "worst_contributor": worst_loss_contributor(result),
+            }
+        )
+    frame = pd.DataFrame(rows)
+    frame = frame.sort_values("portfolio_impact", ascending=True, kind="stable")
+    frame.insert(0, "rank", range(1, len(frame) + 1))
+    return frame.reset_index(drop=True)
+
+
+def correlation_shock_estimate(
+    asset_returns: pd.DataFrame,
+    weights: pd.Series,
+    target_correlation: float = 0.90,
+    *,
+    name: str = "correlation_shock",
+    z_score: float = -2.0,
+) -> StressScenarioResult:
+    """Estimate impact after pushing pairwise correlations toward a crisis level.
+
+    This is a covariance construction estimate, not a historical replay. Asset
+    volatilities are held fixed while off-diagonal correlations are blended
+    toward ``target_correlation``.
+    """
+    if not -1.0 <= target_correlation <= 1.0:
+        raise ValueError("target_correlation must be in [-1, 1]")
+    aligned = asset_returns.dropna(how="any")
+    if aligned.shape[1] < 2:
+        raise ValueError("correlation shock requires at least two assets")
+    w = weights.reindex(aligned.columns).fillna(0.0)
+    w_values = w.to_numpy(dtype=float)
+    vols = aligned.std(ddof=1).to_numpy(dtype=float)
+    corr = aligned.corr().to_numpy(dtype=float)
+    n = len(vols)
+    shocked_corr = corr.copy()
+    for i in range(n):
+        for j in range(n):
+            if i == j:
+                shocked_corr[i, j] = 1.0
+            else:
+                shocked_corr[i, j] = float(target_correlation)
+    # Rebuild covariance with unchanged volatilities.
+    shocked_cov = np.outer(vols, vols) * shocked_corr
+    baseline_cov = aligned.cov().to_numpy(dtype=float)
+    shocked_var = float(w_values.T @ shocked_cov @ w_values)
+    baseline_var = float(w_values.T @ baseline_cov @ w_values)
+    shocked_vol = float(np.sqrt(max(shocked_var, 0.0)))
+    baseline_vol = float(np.sqrt(max(baseline_var, 0.0)))
+    impact = float(z_score * shocked_vol)
+    if shocked_var <= 0:
+        contrib = pd.Series(0.0, index=aligned.columns, name="contribution")
+    else:
+        mrc = shocked_cov @ w_values
+        pct = (w_values * mrc) / shocked_var
+        contrib = pd.Series(pct * impact, index=aligned.columns, name="contribution")
+    return StressScenarioResult(
+        name=name,
+        scenario_type="correlation_shock",
+        methodology="covariance_volatility_estimate",
+        portfolio_impact=impact,
+        asset_contribution=contrib,
+        assumptions={
+            "target_correlation": target_correlation,
+            "z_score": z_score,
+            "baseline_portfolio_volatility": baseline_vol,
+            "shocked_portfolio_volatility": shocked_vol,
+            "limitation": (
+                "Correlations are forced toward a target while volatilities stay "
+                "fixed; this is not an observed path and ignores non-linear crisis "
+                "dynamics."
+            ),
+        },
+        warnings=(
+            "Correlation shock is a covariance construction estimate, not historical replay.",
+        ),
+        diagnostics={
+            "baseline_portfolio_volatility": baseline_vol,
+            "shocked_portfolio_volatility": shocked_vol,
+        },
     )
 
 
