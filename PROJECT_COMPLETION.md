@@ -209,7 +209,7 @@ make dashboard       # already exists — document it
 ## Definition-of-done checklist
 
 - [ ] GitHub CI green
-- [x] `make check` passes (305 tests on 2026-08-05)
+- [x] `make check` passes (311 tests on 2026-08-05)
 - [ ] `make data` works or fails with clear provider message
 - [x] `make features` / `make feature-check` pass
 - [x] New model / stress / backtest / report commands exist and pass
@@ -221,7 +221,7 @@ make dashboard       # already exists — document it
 - [x] `README 2.md` removed if redundant
 - [x] Generated full datasets ignored
 - [x] Research report and example memo reproducible from pipeline outputs
-- [ ] Working tree clean; milestone commits; no push/tag without approval
+- [x] Working tree clean; milestone commits; no push/tag without approval
 
 ## Non-goals / framing
 
