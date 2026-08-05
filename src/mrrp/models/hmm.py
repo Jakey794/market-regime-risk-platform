@@ -124,13 +124,18 @@ class HMMRegimeModel(RegimeModel):
         )
 
     def transform(self, features: pd.DataFrame) -> RegimeModelResult:
-        """Infer states/posteriors with the train-selected HMM."""
+        """Infer causal filtered states with the train-selected HMM.
+
+        Filtering uses observations only through each timestamp. Unlike Viterbi
+        decoding or smoothed posteriors, later observations cannot revise an
+        earlier transformed state.
+        """
         self._require_fitted()
         assert self._model is not None
         data = validate_feature_matrix(features, feature_columns=self._feature_columns)
         values = data.to_numpy(dtype=float)
-        states = self._model.predict(values)
-        probabilities = self._model.predict_proba(values)
+        probabilities = _filtered_probabilities(self._model, values)
+        states = probabilities.argmax(axis=1)
         diagnostics = self._diagnostics(data, states, values)
         diagnostics["note"] = (
             "train_log_likelihood is from the training selection step; "
@@ -238,3 +243,22 @@ def _empirical_state_durations(states: np.ndarray, n_states: int) -> list[float]
 def _implied_state_durations(transmat: np.ndarray) -> list[float]:
     diag = np.clip(np.diag(np.asarray(transmat, dtype=float)), 0.0, 0.999999)
     return [float(1.0 / (1.0 - p)) if p < 1.0 else float("inf") for p in diag]
+
+
+def _filtered_probabilities(model: GaussianHMM, values: np.ndarray) -> np.ndarray:
+    """Return normalized forward-filter probabilities without future smoothing."""
+    log_likelihood = model._compute_log_likelihood(values)  # noqa: SLF001
+    likelihood = np.exp(log_likelihood - np.max(log_likelihood, axis=1, keepdims=True))
+    filtered = np.empty_like(likelihood)
+    prior = np.asarray(model.startprob_, dtype=float)
+    transition = np.asarray(model.transmat_, dtype=float)
+    for idx, emission in enumerate(likelihood):
+        prediction = prior if idx == 0 else filtered[idx - 1] @ transition
+        posterior = prediction * emission
+        total = float(posterior.sum())
+        if not np.isfinite(total) or total <= 0:
+            posterior = np.full(model.n_components, 1.0 / model.n_components)
+        else:
+            posterior = posterior / total
+        filtered[idx] = posterior
+    return filtered

@@ -1,4 +1,4 @@
-"""Fit threshold / KMeans / GMM regime models and persist comparison artifacts."""
+"""Fit configured regime models and persist comparison artifacts."""
 
 from __future__ import annotations
 
@@ -11,9 +11,11 @@ import pandas as pd
 
 from mrrp.data.cache import load_parquet
 from mrrp.models.base import chronological_split
+from mrrp.models.changepoint import ChangePointConfig, ChangePointDetector
 from mrrp.models.compare import build_comparison_table
 from mrrp.models.config import load_regime_models_config
 from mrrp.models.gmm import GMMConfig, GMMRegimeModel
+from mrrp.models.hmm import HMMConfig, HMMRegimeModel
 from mrrp.models.kmeans import KMeansConfig, KMeansRegimeModel
 from mrrp.models.result import RegimeModelResult
 from mrrp.models.threshold import ThresholdConfig, ThresholdRegimeModel
@@ -26,7 +28,7 @@ def fit_configured_models(
     *,
     config_path: str | Path = DEFAULT_CONFIG,
 ) -> list[RegimeModelResult]:
-    """Fit enabled Phase-1 models using train-only parameters."""
+    """Fit enabled models using train-only parameters."""
     config = load_regime_models_config(config_path)
     split = chronological_split(
         features.loc[:, list(config.feature_columns)],
@@ -89,6 +91,42 @@ def fit_configured_models(
                 model.fit(split.train)
                 results.append(model.transform(split.full))
 
+    hmm_cfg = raw.get("hmm", {})
+    if hmm_cfg.get("enabled", False):
+        for n_states in hmm_cfg.get("n_states", [3]):
+            model = HMMRegimeModel(
+                HMMConfig(
+                    n_states=int(n_states),
+                    covariance_type=hmm_cfg.get("covariance_type", "diag"),
+                    feature_columns=config.feature_columns,
+                    random_seed=config.random_seed,
+                    n_inits=int(hmm_cfg.get("n_inits", 5)),
+                    n_iter=int(hmm_cfg.get("n_iter", 200)),
+                    tol=float(hmm_cfg.get("tol", 1e-3)),
+                )
+            )
+            model.fit(split.train)
+            results.append(model.transform(split.full))
+
+    changepoint_cfg = raw.get("changepoint", {})
+    if changepoint_cfg.get("enabled", False):
+        for method in changepoint_cfg.get("methods", ["pelt"]):
+            for signal in changepoint_cfg.get("signals", ["volatility"]):
+                detector = ChangePointDetector(
+                    ChangePointConfig(
+                        method=method,
+                        signal=signal,
+                        penalty=float(changepoint_cfg.get("penalty", 10.0)),
+                        n_bkps=changepoint_cfg.get("n_bkps"),
+                        model=str(changepoint_cfg.get("model", "l2")),
+                        min_size=int(changepoint_cfg.get("min_size", 5)),
+                    )
+                )
+                # Change points are descriptive and are detected on training data
+                # only. Persist their train-period segments alongside fitted models.
+                detected = detector.detect(split.train)
+                results.append(detected.to_regime_result(split.train))
+
     return results
 
 
@@ -109,6 +147,11 @@ def persist_model_results(
         stem = f"{result.model_name}_{len(result.economic_labels)}"
         if "covariance_type" in result.fitted_parameters:
             stem += f"_{result.fitted_parameters['covariance_type']}"
+        if result.model_name == "changepoint":
+            stem += (
+                f"_{result.fitted_parameters['method']}"
+                f"_{result.fitted_parameters['signal']}"
+            )
         path = out / f"{stem}.json"
         path.write_text(
             json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
