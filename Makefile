@@ -1,4 +1,4 @@
-.PHONY: setup data dashboard features feature-check test lint format check clean
+.PHONY: setup data dashboard features feature-check models model-check test lint format check clean
 
 setup:
 	uv sync
@@ -14,6 +14,12 @@ features:
 
 feature-check:
 	uv run python -m mrrp.features.validate_features
+
+models:
+	uv run python -m mrrp.models.build_models --config configs/regime_models.yaml
+
+model-check:
+	uv run python -c "from pathlib import Path; p=Path('data/processed/regime_models/manifest.json'); assert p.exists(), p"
 
 test:
 	uv run pytest

@@ -1,0 +1,53 @@
+random_seed: 42
+train_end: "2021-12-31"
+validation_end: "2023-06-30"
+feature_columns:
+  - portfolio_vol_21d
+  - portfolio_vol_63d
+  - mean_corr_21d
+  - mean_corr_63d
+  - portfolio_drawdown
+  - portfolio_momentum_63d
+  - vol_z_252d
+  - corr_z_252d
+
+threshold:
+  enabled: true
+  n_states: [2, 3, 4]
+  vol_column: portfolio_vol_63d
+  corr_column: mean_corr_63d
+  high_vol_percentile: 0.75
+  high_corr_percentile: 0.75
+
+kmeans:
+  enabled: true
+  n_states: [2, 3, 4]
+  n_init: 10
+  max_iter: 300
+
+gmm:
+  enabled: true
+  n_states: [2, 3, 4]
+  covariance_types: [full, diag]
+  n_init: 5
+  max_iter: 200
+  reg_covar: 1.0e-6
+
+hmm:
+  enabled: true
+  n_states: [2, 3, 4]
+  covariance_type: diag
+  n_inits: 5
+  n_iter: 200
+
+changepoint:
+  enabled: true
+  methods: [pelt, binseg]
+  signals: [volatility, correlation, multivariate]
+  penalty: 10.0
+  n_bkps: 5
+  model: l2
+
+paths:
+  features: data/processed/regime_features_scaled.parquet
+  output_dir: data/processed/regime_models

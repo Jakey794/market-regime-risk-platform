@@ -1,0 +1,61 @@
+---
+description: Market regime and portfolio risk platform engineering rules
+alwaysApply: true
+---
+
+# Quant Platform Rules
+
+This repository is a portfolio-risk, regime-detection, stress-testing,
+backtesting, and research platform. It is **not** a stock-prediction app.
+
+## Framing
+
+- Do not claim reliable alpha, market prediction, guaranteed risk reduction, or
+  investment performance.
+- Keep language conservative and research-oriented.
+- Do not produce buy/sell instructions or personalized financial advice.
+
+## Data and leakage safety
+
+- Preserve `pandas.DatetimeIndex` on every time-series output.
+- Use trailing or expanding windows only. Never use centered rolling windows.
+- Split chronologically into train / validation / test before any learned fit.
+- Fit scalers and models on the training period only; transform/infer afterward.
+- Backtests must separate signal, decision, execution, and return dates.
+- No same-close execution and no look-ahead from future information.
+- Prefer deterministic random seeds for stochastic models.
+
+## Architecture
+
+- Single package: `mrrp` under `src/`. Do not create a second package.
+- Keep financial math in reusable typed modules.
+- Keep Streamlit pages thin; no duplicated calculations in pages or notebooks.
+- Drive research parameters through YAML configs.
+- Dashboard tests must use temporary fixtures or injected paths, never ignored
+  developer-local artifacts or live network calls.
+
+## Validation commands
+
+- `make setup`
+- `make data`
+- `make dashboard`
+- `make features`
+- `make feature-check`
+- `make models` / `make model-check` (when present)
+- `make stress` (when present)
+- `make backtest` (when present)
+- `make report` (when present)
+- `make test`
+- `make lint`
+- `make check`
+- `make format`
+- `make clean`
+
+## Process
+
+- Inspect before editing.
+- Add tests for every new financial/feature/model/stress/backtest function.
+- Run `make check` before considering work complete.
+- Do not push, merge, force-push, rewrite history, or tag releases without
+  explicit approval.
+- Do not add dependencies without explicit approval.
