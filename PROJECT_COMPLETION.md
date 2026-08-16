@@ -55,7 +55,7 @@ make dashboard
 
 - Screenshots / demo recordings are optional owner assets (`reports/screenshots/`).
 - PDF export of the research memo is optional and environment-dependent.
-- License terms remain TBD pending owner approval.
+- The repository is MIT licensed; `CITATION.cff` provides citation metadata.
 - Deployment (for example Streamlit Cloud) requires an explicit owner action.
 - Free ETF data, simplified costs, and descriptive regimes remain research limits,
   not unresolved engineering TODOs.

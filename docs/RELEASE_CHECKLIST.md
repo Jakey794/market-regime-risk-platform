@@ -6,10 +6,10 @@
 - [x] Pages 1–9 pass Streamlit AppTest; synthetic fallback launches without
   processed prices
 - [x] Future-mutation leakage tests pass
-- [x] Generated feature/model/backtest artifacts are gitignored; credentials are
-  absent from the repository
+- [x] Generated price, feature, model, backtest, and stress artifacts are
+  gitignored; credentials are absent from the repository
 - [x] Reports distinguish computed, unavailable, replayed, and estimated values
 - [x] README limitations and license-TBD statement are current
 - [ ] Screenshot placeholders are replaced only with genuine current screenshots
   (owner/manual)
-- [ ] Owner explicitly approves any deployment, release tag, and license
+- [ ] Owner explicitly approves any public deployment and release tag

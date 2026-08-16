@@ -38,6 +38,7 @@ yarn-error.log*
 postgres_data/
 
 # Generated feature artifacts
+data/raw/*.parquet
 data/processed/*.parquet
 data/processed/regime_feature_metadata.json
 data/processed/regime_models/

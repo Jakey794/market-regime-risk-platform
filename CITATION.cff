@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this project in research, please cite it using this metadata."
+title: "Market Regime + Portfolio Risk Platform"
+type: software
+authors:
+  - family-names: Allan
+    given-names: Jacob
+repository-code: "https://github.com/Jakey794/market-regime-risk-platform"
+license: MIT

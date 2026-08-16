@@ -1,8 +1,17 @@
-# Security
+# Security Policy
 
-Do not open a public issue containing credentials, private portfolio data, or
-provider tokens. Report suspected vulnerabilities privately to the repository
-owner through the contact method on their GitHub profile.
+## Reporting a vulnerability
+
+Do not open a public issue containing credentials, private portfolio data,
+provider tokens, or vulnerability details. Use GitHub's private security
+advisory reporting for this repository when it is available; otherwise contact
+the repository owner privately through GitHub.
+
+Please include a concise description, reproduction steps, likely impact, and
+any suggested mitigation. Do not include real secrets or private financial
+data.
+
+## Scope
 
 This research application does not execute trades or hold brokerage
 credentials. Treat uploaded configs, cached market data, generated reports, and

@@ -1,5 +1,9 @@
 # Market Regime + Portfolio Risk Platform
 
+[![CI](https://github.com/Jakey794/market-regime-risk-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/Jakey794/market-regime-risk-platform/actions/workflows/ci.yml)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A Python research platform for **portfolio risk measurement**, **market-regime
 analysis**, **stress testing**, and **no-look-ahead backtesting**.
 
@@ -8,6 +12,16 @@ guaranteed risk reduction, or investment performance.
 
 The goal is to study how portfolios behave across changing market environments
 and to produce interpretable, leakage-aware research outputs.
+
+## Why this exists
+
+Market risk research is easy to make look more certain than it is. This project
+keeps the analytical pipeline explicit: inputs are validated, learned
+transformations are fitted only on chronological training data, and backtests
+separate signal, decision, execution, and return-realization dates.
+
+It is intended as a reproducible engineering and research demonstration, not as
+investment guidance or a deployable trading system.
 
 ## v1.0 status
 
@@ -42,6 +56,11 @@ make dashboard   # launch the Streamlit app
 make test
 make check       # ruff lint + format check + pytest
 ```
+
+The dashboard starts with deterministic synthetic data when a local market-data
+cache is absent. This makes a fresh clone runnable without credentials or a
+network download. To refresh observed ETF data locally, run `make data`; those
+generated cache files are deliberately not versioned.
 
 ## What it demonstrates
 
@@ -78,6 +97,19 @@ Pages:
 
 The dashboard reports historical, deterministic estimates for research purposes
 only. It is not financial advice.
+
+## Reproducibility and data
+
+- `data/sample/synthetic_prices.parquet` is the tracked, deterministic demo
+  fixture. Its construction and limits are documented in
+  [`data/sample/README.md`](data/sample/README.md).
+- `make data` downloads a local cache using the configured universe. It may
+  change as providers revise history and is not a source of record.
+- Generated regime features, fitted models, stress results, backtests, and
+  downloaded price caches remain local. Re-run the documented commands to
+  reproduce them from an appropriate data source.
+- The project has no brokerage integration, order execution, or claim of
+  predictive performance.
 
 ## Architecture
 
@@ -144,14 +176,25 @@ tests/         Offline unit tests and Streamlit AppTests
 - Historical backtests can overfit research choices and use a simplified cost model.
 - The tracked sample dataset is deterministic and synthetic, for demos only.
 
-## Secret-free demo and deployment
+## Deployment
 
-`data/sample/synthetic_prices.parquet` is clearly synthetic and lets the app run
-without data-provider credentials when processed prices are absent. Streamlit
-Cloud can install `requirements.txt` and launch `app/streamlit_app.py`.
-Screenshot placeholders for a future release are listed in `docs/DEMO_SCRIPT.md`;
-no screenshots are represented as completed assets.
+This is a Streamlit application, not a Vite/React or Vercel site. Configure a
+host to install from `requirements.txt` and launch `app/streamlit_app.py`.
+`st.set_page_config` supplies a distinct browser title for every dashboard page,
+a favicon, and a responsive wide layout. See
+[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for a pre-launch checklist.
+
+Screenshot placeholders for a future release are listed in
+[`docs/DEMO_SCRIPT.md`](docs/DEMO_SCRIPT.md); no screenshots are represented as
+completed assets.
+
+## Contributing and security
+
+Contributions are welcome through focused pull requests. Read
+[`CONTRIBUTING.md`](CONTRIBUTING.md), [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md),
+and [`SECURITY.md`](SECURITY.md) first.
 
 ## License
 
-License terms are TBD pending owner approval. No ownership terms are implied.
+Released under the [MIT License](LICENSE). If you use this work in research,
+please cite it using [`CITATION.cff`](CITATION.cff).
