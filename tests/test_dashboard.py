@@ -89,7 +89,7 @@ def test_regime_feature_diagnostics_page_renders(
     assert regime_feature_artifact_dir.exists()
 
 
-def test_regime_feature_diagnostics_missing_artifacts_is_stable(
+def test_regime_feature_diagnostics_missing_artifacts_uses_fallback(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -100,8 +100,10 @@ def test_regime_feature_diagnostics_missing_artifacts_is_stable(
     assert not app.exception
     assert not app.error
     assert app.title[0].value == "Regime Feature Diagnostics"
-    assert len(app.sidebar.radio) == 0
-    assert any("make features" in warning.value.lower() for warning in app.warning)
+    assert len(app.sidebar.radio) == 1
+    assert len(app.sidebar.multiselect) == 1
+    assert len(app.get("plotly_chart")) == 2
+    assert any("session derived" in info.value.lower() for info in app.info)
 
 
 def test_regime_detection_page_renders(regime_feature_artifact_dir: Path) -> None:

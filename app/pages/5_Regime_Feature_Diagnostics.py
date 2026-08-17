@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-import json
 from datetime import date
-from pathlib import Path
-from typing import Any
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -17,34 +14,20 @@ from mrrp.dashboard.components import (
     render_page_header,
 )
 from mrrp.dashboard.formatting import format_decimal
-from mrrp.dashboard.paths import regime_feature_paths
+from mrrp.dashboard.paths import (
+    DEFAULT_CONFIG_DIR,
+    portfolio_config_path,
+    prices_path,
+    regime_feature_paths,
+)
+from mrrp.dashboard.regime_artifacts import load_or_build_regime_artifacts
 from mrrp.data.cache import load_parquet
 from mrrp.data.validators import report_missing_data
+from mrrp.portfolio import load_portfolio_config
 from mrrp.reporting import build_correlation_heatmap_figure
 
 
-RUN_MAKE_FEATURES_MESSAGE = "Run `make features` to build the regime feature artifacts."
 DEFAULT_FEATURE_COUNT = 4
-
-
-@st.cache_data(show_spinner=False)
-def load_feature_data(
-    raw_path: str,
-    scaled_path: str,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Load cached raw and train-scaled regime feature artifacts."""
-    return load_parquet(raw_path), load_parquet(scaled_path)
-
-
-@st.cache_data(show_spinner=False)
-def load_metadata(path: str) -> dict[str, Any]:
-    """Load the regime feature build metadata as a plain dictionary."""
-    metadata_path = Path(path)
-    if not metadata_path.exists():
-        raise FileNotFoundError(
-            f"Feature metadata file does not exist: {metadata_path}"
-        )
-    return json.loads(metadata_path.read_text(encoding="utf-8"))
 
 
 def filter_by_date(
@@ -92,36 +75,36 @@ render_page_header(
 
 feature_paths = regime_feature_paths()
 try:
-    raw_features, scaled_features = load_feature_data(
-        str(feature_paths.raw),
-        str(feature_paths.scaled),
+    source_prices = load_parquet(prices_path())
+    raw_features, scaled_features, metadata, used_session_fallback = (
+        load_or_build_regime_artifacts(
+            source_prices,
+            load_portfolio_config(portfolio_config_path()),
+            raw_path=feature_paths.raw,
+            scaled_path=feature_paths.scaled,
+            metadata_path=feature_paths.metadata,
+            feature_config_path=DEFAULT_CONFIG_DIR / "regime_features.yaml",
+        )
     )
-    metadata = load_metadata(str(feature_paths.metadata))
-except FileNotFoundError as exc:
-    st.warning(f"{exc} {RUN_MAKE_FEATURES_MESSAGE}")
-    st.info(
-        "Regime feature diagnostics are unavailable until artifacts are built. "
-        "Other dashboard pages that use processed prices remain available."
-    )
-    render_disclaimer()
-    st.stop()
 except (OSError, ValueError) as exc:
-    st.error(
-        f"Unable to load regime feature artifacts: {exc} {RUN_MAKE_FEATURES_MESSAGE}"
-    )
+    st.error(f"Unable to prepare regime feature diagnostics: {exc}")
     render_disclaimer()
     st.stop()
 
+if used_session_fallback:
+    st.info(
+        "Regime feature artifacts are unavailable, so this session derived and "
+        "train-scaled leakage-safe features from the tracked demo prices."
+    )
+
 if raw_features.empty or scaled_features.empty:
-    st.error(f"Regime feature artifacts are empty. {RUN_MAKE_FEATURES_MESSAGE}")
+    st.error("Regime feature data is empty.")
     render_disclaimer()
     st.stop()
 if not isinstance(raw_features.index, pd.DatetimeIndex) or not isinstance(
     scaled_features.index, pd.DatetimeIndex
 ):
-    st.error(
-        f"Regime feature artifacts must have a DatetimeIndex. {RUN_MAKE_FEATURES_MESSAGE}"
-    )
+    st.error("Regime feature data must have a DatetimeIndex.")
     render_disclaimer()
     st.stop()
 
