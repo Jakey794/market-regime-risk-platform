@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 import streamlit as st
 
@@ -18,13 +16,11 @@ from mrrp.dashboard.components import (
 )
 from mrrp.dashboard.formatting import format_decimal, format_percentage
 from mrrp.dashboard.loaders import load_dashboard_options
+from mrrp.dashboard.paths import portfolio_config_path, prices_path
 from mrrp.dashboard.state import get_dashboard_data, get_dashboard_state
 from mrrp.utils.dates import days_since
 
 
-ROOT_DIR = Path(__file__).resolve().parents[2]
-PRICES_PATH = ROOT_DIR / "data" / "processed" / "adjusted_close.parquet"
-PORTFOLIO_CONFIG_PATH = ROOT_DIR / "configs" / "sample_portfolio.yaml"
 STALE_THRESHOLD_DAYS = 7
 RUN_MAKE_DATA_MESSAGE = "Run `make data` if data is missing or stale."
 
@@ -88,10 +84,14 @@ render_metric_cards(
 
 st.subheader("Freshness and provenance")
 try:
-    options = load_dashboard_options(str(PRICES_PATH), str(PORTFOLIO_CONFIG_PATH))
+    source_prices_path = prices_path()
+    source_portfolio_path = portfolio_config_path()
+    options = load_dashboard_options(
+        str(source_prices_path), str(source_portfolio_path)
+    )
     latest_available_date = options.maximum_date.date()
     staleness_days = days_since(latest_available_date)
-    cache_refreshed = pd.Timestamp(PRICES_PATH.stat().st_mtime, unit="s")
+    cache_refreshed = pd.Timestamp(source_prices_path.stat().st_mtime, unit="s")
 except (FileNotFoundError, OSError, ValueError) as exc:
     st.warning(f"Unable to check data freshness: {exc}. {RUN_MAKE_DATA_MESSAGE}")
 else:
