@@ -15,7 +15,13 @@ from mrrp.dashboard.components import (
     render_metric_cards,
     render_page_header,
 )
-from mrrp.dashboard.paths import regime_feature_paths
+from mrrp.dashboard.paths import (
+    DEFAULT_CONFIG_DIR,
+    portfolio_config_path,
+    prices_path,
+    regime_feature_paths,
+)
+from mrrp.dashboard.regime_artifacts import load_or_build_regime_artifacts
 from mrrp.dashboard.state import get_dashboard_data
 from mrrp.data.cache import load_parquet
 from mrrp.models import (
@@ -31,6 +37,7 @@ from mrrp.models import (
     ThresholdRegimeModel,
     build_comparison_table,
 )
+from mrrp.portfolio import load_portfolio_config
 from mrrp.reporting import (
     build_regime_shaded_wealth_figure,
     build_transition_heatmap_figure,
@@ -50,12 +57,29 @@ except ValueError:
 
 paths = regime_feature_paths()
 try:
-    features = load_parquet(paths.scaled).dropna()
-    raw_features = load_parquet(paths.raw).reindex(features.index)
+    source_prices = load_parquet(prices_path())
+    raw_features, scaled_features, _, used_session_fallback = (
+        load_or_build_regime_artifacts(
+            source_prices,
+            load_portfolio_config(portfolio_config_path()),
+            raw_path=paths.raw,
+            scaled_path=paths.scaled,
+            metadata_path=paths.metadata,
+            feature_config_path=DEFAULT_CONFIG_DIR / "regime_features.yaml",
+        )
+    )
+    features = scaled_features.dropna()
+    raw_features = raw_features.reindex(features.index)
 except (FileNotFoundError, OSError, ValueError) as exc:
-    st.warning(f"Regime model artifacts are unavailable: {exc}. Run `make features`.")
+    st.warning(f"Regime features are unavailable: {exc}")
     render_disclaimer()
     st.stop()
+
+if used_session_fallback:
+    st.info(
+        "Regime feature artifacts are unavailable, so this session derived and "
+        "train-scaled leakage-safe features from the tracked demo prices."
+    )
 
 vol_regime = classify_volatility_regime_from_features(raw_features)
 corr_regime = classify_correlation_regime_from_features(raw_features)
