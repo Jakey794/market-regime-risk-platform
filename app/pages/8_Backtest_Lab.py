@@ -11,9 +11,9 @@ from mrrp.dashboard.components import (
     render_metric_cards,
     render_page_header,
 )
-from mrrp.dashboard.paths import regime_feature_paths
+from mrrp.dashboard.backtest import load_or_build_backtest_features
+from mrrp.dashboard.paths import DEFAULT_CONFIG_DIR, regime_feature_paths
 from mrrp.dashboard.state import get_dashboard_data
-from mrrp.data.cache import load_parquet
 
 
 RULE_OPTIONS = [
@@ -42,13 +42,22 @@ rule_name = st.selectbox("Allocation rule", RULE_OPTIONS)
 frequency = st.selectbox("Rebalance frequency", ["M", "W", "Q"])
 cost_bps = st.number_input("Transaction cost (bps)", 0.0, 100.0, 10.0)
 try:
-    features = load_parquet(regime_feature_paths().raw).reindex(data.prices.index)
-except (FileNotFoundError, OSError, ValueError):
-    features = pd.DataFrame(index=data.prices.index)
-    if rule_name != "static_benchmark":
-        st.warning("Risk-aware rules require feature artifacts. Run `make features`.")
-        render_disclaimer()
-        st.stop()
+    features, used_session_fallback = load_or_build_backtest_features(
+        data.prices,
+        data.portfolio_config,
+        artifact_path=regime_feature_paths().raw,
+        feature_config_path=DEFAULT_CONFIG_DIR / "regime_features.yaml",
+    )
+except ValueError as exc:
+    st.warning(f"Backtest unavailable for this selection: {exc}")
+    render_disclaimer()
+    st.stop()
+
+if used_session_fallback:
+    st.info(
+        "Regime feature artifacts are unavailable, so this session derived "
+        "leakage-safe features from the selected demo prices."
+    )
 
 # Defensive sleeve reduces concentration toward equal-weight risk-off mix.
 # Cash/risk-off is represented by blending toward these defensive weights when
