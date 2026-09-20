@@ -1,6 +1,5 @@
 # Project Completion — v1.0
 
-Branch: `cursor/complete-v1`  
 Date: 2026-08-05
 
 This document records acceptance evidence for the recruiter-ready v1.0 research
